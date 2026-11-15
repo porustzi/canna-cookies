@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>CANNA COOKIES</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+      ;(function () {
+        try {
+          var stored = localStorage.getItem('cc_lang')
+          var nav = (navigator.language || 'cs').slice(0, 2).toLowerCase()
+          var lang = stored === 'cs' || stored === 'en' || stored === 'ru' ? stored : nav === 'ru' || nav === 'en' || nav === 'cs' ? nav : 'cs'
+          location.replace('/' + lang + '/')
+        } catch (e) {
+          location.replace('/cs/')
+        }
+      })()
+    </script>
+  </head>
+  <body style="background:#080A0C;color:#A7B2BA;display:grid;place-items:center;height:100vh;margin:0;font-family:system-ui,sans-serif">
+    <noscript>
+      <div style="text-align:center">
+        <p>CANNA COOKIES — DON'T PANIC, IT'S ORGANIC.</p>
+        <p><a style="color:#00D9E8" href="/cs/">Čeština</a> · <a style="color:#00D9E8" href="/en/">English</a> · <a style="color:#00D9E8" href="/ru/">Русский</a></p>
+      </div>
+    </noscript>
+  </body>
+</html>
