@@ -71,9 +71,13 @@ Cloudflare Dashboard → Workers & Pages → `canna-cookies` → Settings → **
 - каждый PR/ветка = Preview Deployment, `main` = Production
 - откат: Deployments → нужный деплой → **Rollback**
 
-**GitHub Actions:** `.github/workflows/deploy.yml` готов — добавьте в репозиторий secrets
+**GitHub Actions (опционально):** workflow лежит в репозитории как `.github/deploy-workflow.yml`
+(текущий GitHub-токен не имеет scope `workflow`, поэтому файл не в `.github/workflows/` и не исполняется).
+Чтобы включить автодеплой: переименуйте его в `.github/workflows/deploy.yml` (через веб-интерфейс GitHub
+или токеном со scope `workflow`) и добавьте secrets репозитория:
 `CLOUDFLARE_API_TOKEN` (права: Account → Cloudflare Pages → Edit) и `CLOUDFLARE_ACCOUNT_ID`
 (`d8dd2eab287e01726a07d34a5f90e9fe`). Push в `main` → production, ветка PR → preview-деплой.
+Если подключить Cloudflare Pages Git integration (пункт выше) — Actions не нужны вовсе.
 
 **Свой домен (Этап 2):** Dashboard → `canna-cookies` → Custom domains → Add domain → DNS на Cloudflare
 (или CNAME на `canna-cookies.pages.dev`). После подключения домена заменить канонические URL в
