@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useSite } from '../site'
 import { IconLock } from './Icons'
-import { Mark } from './Logo'
+import { BrandLogo } from './Logo'
 
 export function AgeGate({ mode, onAccept, onDeny }: { mode: 'gate' | 'denied'; onAccept: () => void; onDeny?: () => void }) {
   const { t } = useSite()
@@ -53,9 +53,13 @@ export function AgeGate({ mode, onAccept, onDeny }: { mode: 'gate' | 'denied'; o
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
         className="cc-card relative z-10 w-full max-w-[560px] p-7 text-center md:p-11"
       >
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-aqua/30 bg-aqua/[0.08] text-aqua">
-          {denied ? <IconLock className="h-6 w-6" /> : <Mark className="h-9 w-9" />}
-        </div>
+        {denied ? (
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-aqua/30 bg-aqua/[0.08] text-aqua">
+            <IconLock className="h-6 w-6" />
+          </div>
+        ) : (
+          <BrandLogo className="mx-auto h-44 w-auto max-w-full" />
+        )}
 
         <span className="cc-eyebrow mt-6">{t.age.kicker}</span>
 

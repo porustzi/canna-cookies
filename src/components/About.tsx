@@ -1,7 +1,7 @@
 import { useSite } from '../site'
 import { Card, Reveal, Section, SectionHead } from './ui'
 import { IconArrow } from './Icons'
-import { Mark } from './Logo'
+import { BrandLogo } from './Logo'
 
 export function About() {
   const { t } = useSite()
@@ -62,7 +62,7 @@ export function About() {
                     className="absolute h-52 w-52 rounded-full border border-dashed border-aqua/25"
                     style={{ animation: 'cc-spin 40s linear infinite' }}
                   />
-                  <Mark className="relative h-20 w-20 drop-shadow-[0_0_35px_rgba(0,217,232,0.5)]" />
+                  <BrandLogo className="relative h-52 w-auto" />
                 </div>
 
                 <div className="relative border-t border-white/8 pt-5">

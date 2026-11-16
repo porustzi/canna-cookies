@@ -42,7 +42,7 @@ export function Hero() {
           />
           <div className="absolute inset-20 rounded-full bg-gradient-to-br from-aqua/12 via-transparent to-teal/10 shadow-[0_0_120px_-40px_rgba(0,217,232,0.9)]" />
           <div className="absolute inset-0 grid place-items-center">
-            <Mark className="h-24 w-24 drop-shadow-[0_0_40px_rgba(0,217,232,0.45)]" />
+            <Mark className="h-24 w-24" />
           </div>
           <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-aqua shadow-[0_0_18px_4px_rgba(0,217,232,0.7)]" />
           <div className="absolute bottom-6 right-10 h-1.5 w-1.5 rounded-full bg-teal shadow-[0_0_14px_3px_rgba(22,207,192,0.7)]" />

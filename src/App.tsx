@@ -79,6 +79,8 @@ export default function App({ initialLang }: { initialLang: Lang }) {
     setMetaProperty('og:description', seo.description)
     setMetaProperty('og:url', `${SITE_URL}/${lang}/`)
     setMetaProperty('og:locale', seo.locale)
+    setMetaProperty('og:image', `${SITE_URL}/og.jpg`)
+    setMeta('twitter:image', `${SITE_URL}/og.jpg`)
 
     setLink('canonical', `${SITE_URL}/${lang}/`)
     ALL_LANGS.forEach((code) => setLink('alternate', `${SITE_URL}/${code}/`, { name: 'hreflang', value: code }))
