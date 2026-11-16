@@ -22,6 +22,8 @@ export interface WhyItem {
   icon: 'leaf' | 'layers' | 'shield' | 'map' | 'lock' | 'send'
   title: string
   text: string
+  gallery?: boolean
+  cta?: string
 }
 
 export interface DeliveryRow {
@@ -94,6 +96,7 @@ export interface Dict {
     deniedText: string
   }
   modal: { badge: string; title: string; text: string; close: string }
+  gallery: { badge: string; title: string; text: string; close: string }
 }
 
 const cs: Dict = {
@@ -134,7 +137,7 @@ const cs: Dict = {
       { icon: 'leaf', title: 'Organický základ', text: 'Sázíme na přirozené složení a suroviny, kterým rozumíme.' },
       { icon: 'layers', title: 'Složení bez tajemství', text: 'Žádné drobné písmo. Každý produkt má jasně popsán obsah.' },
       { icon: 'shield', title: 'Kontrola kvality', text: 'Spolupracujeme s osvědčenými dodavateli a postupy, které dávají smysl.' },
-      { icon: 'map', title: 'Pro český trh', text: 'Značka vzniká v ČR a respektuje místní pravidla i zvyklosti.' },
+      { icon: 'map', title: 'Fyzický bod', text: 'Máme vlastní prodejní místo v ČR — vše legálně, kontrolovaně a podle místních pravidel.', gallery: true, cta: 'Prohlédnout fotky' },
       { icon: 'lock', title: 'Pouze 21+', text: 'Prodej výhradně plnoletým — hranici 21 let jsme stanovili sami.' },
       { icon: 'send', title: 'Katalog v Telegramu', text: 'Připravujeme Telegram Mini App s katalogem, košíkem a objednávkami.' },
     ],
@@ -248,6 +251,12 @@ const cs: Dict = {
     text: 'Telegram Mini App s katalogem, košíkem a objednávkami je ve vývoji (etapa 3). Spuštění oznámíme na našich kanálech.',
     close: 'Rozumím',
   },
+  gallery: {
+    badge: 'Galerie',
+    title: 'Fotky našeho místa',
+    text: 'Fotografie prodejního místa právě připravujeme — galerie se brzy doplní.',
+    close: 'Zavřít',
+  },
 }
 
 const en: Dict = {
@@ -288,7 +297,7 @@ const en: Dict = {
       { icon: 'leaf', title: 'Organic foundation', text: 'We rely on natural composition and ingredients we understand.' },
       { icon: 'layers', title: 'No hidden details', text: 'No fine print. Every product has clearly described contents.' },
       { icon: 'shield', title: 'Quality control', text: 'We work with proven suppliers and procedures that make sense.' },
-      { icon: 'map', title: 'Built for Czechia', text: 'The brand is created in the CZ and respects local rules and habits.' },
+      { icon: 'map', title: 'Physical point', text: 'Our own point of sale in the CZ — everything is legal, controlled and by the local rules.', gallery: true, cta: 'View photos' },
       { icon: 'lock', title: '21+ only', text: 'Sales strictly to adults — we set the 21+ threshold ourselves.' },
       { icon: 'send', title: 'Telegram catalogue', text: 'A Telegram Mini App with catalogue, cart and ordering is in the works.' },
     ],
@@ -402,6 +411,12 @@ const en: Dict = {
     text: 'The Telegram Mini App with catalogue, cart and ordering is in development (stage 3). We will announce the launch on our channels.',
     close: 'Got it',
   },
+  gallery: {
+    badge: 'Gallery',
+    title: 'Photos of our place',
+    text: 'We are preparing photos of the point of sale — the gallery will be filled in soon.',
+    close: 'Close',
+  },
 }
 
 const ru: Dict = {
@@ -442,7 +457,7 @@ const ru: Dict = {
       { icon: 'leaf', title: 'Органическая основа', text: 'Делаем ставку на натуральный состав и ингредиенты, которые понимаем.' },
       { icon: 'layers', title: 'Состав без тайн', text: 'Никакого мелкого шрифта. У каждого продукта описано содержание.' },
       { icon: 'shield', title: 'Контроль качества', text: 'Работаем с проверенными поставщиками и процессами, которые имеют смысл.' },
-      { icon: 'map', title: 'Для чешского рынка', text: 'Бренд создан в Чехии и уважает местные правила и обычаи.' },
+      { icon: 'map', title: 'Физическая точка', text: 'Собственная точка продаж в Чехии — всё легально, по местным правилам и под контролем.', gallery: true, cta: 'Смотреть фото' },
       { icon: 'lock', title: 'Только 21+', text: 'Продаём исключительно совершеннолетним — порог 21 года мы установили сами.' },
       { icon: 'send', title: 'Каталог в Telegram', text: 'Готовим Telegram Mini App с каталогом, корзиной и оформлением заказов.' },
     ],
@@ -555,6 +570,12 @@ const ru: Dict = {
     title: 'Каталог в разработке',
     text: 'Telegram Mini App с каталогом, корзиной и заказами в разработке (3-й этап). О запуске сообщим в наших каналах.',
     close: 'Понятно',
+  },
+  gallery: {
+    badge: 'Галерея',
+    title: 'Фото нашей точки',
+    text: 'Фотографии точки продаж уже готовим — галерея скоро пополнится.',
+    close: 'Закрыть',
   },
 }
 

@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useSite } from '../site'
 import { Card, Reveal, Section, SectionHead } from './ui'
-import { IconLayers, IconLeaf, IconLock, IconMap, IconSend, IconShield } from './Icons'
+import { IconCamera, IconLayers, IconLeaf, IconLock, IconMap, IconSend, IconShield } from './Icons'
+import { Gallery } from './Gallery'
 import type { WhyItem } from '../i18n'
 
 const ICONS: Record<WhyItem['icon'], typeof IconLeaf> = {
@@ -14,6 +16,7 @@ const ICONS: Record<WhyItem['icon'], typeof IconLeaf> = {
 
 export function Why() {
   const { t } = useSite()
+  const [galleryOpen, setGalleryOpen] = useState(false)
 
   return (
     <Section id="why" className="bg-slate-deep/60">
@@ -36,11 +39,23 @@ export function Why() {
                   </div>
                   <h3 className="mt-6 text-[19px] leading-snug">{item.title}</h3>
                   <p className="mt-3 text-[14.5px] leading-relaxed text-mist">{item.text}</p>
+                  {item.gallery && item.cta ? (
+                    <button
+                      type="button"
+                      onClick={() => setGalleryOpen(true)}
+                      className="cc-btn-ghost mt-5 inline-flex w-full justify-center px-6 py-3.5 text-[12px]"
+                    >
+                      <IconCamera className="h-4 w-4" />
+                      {item.cta}
+                    </button>
+                  ) : null}
                 </Card>
               </Reveal>
             )
           })}
         </div>
+
+        <Gallery open={galleryOpen} onClose={() => setGalleryOpen(false)} />
       </div>
     </Section>
   )

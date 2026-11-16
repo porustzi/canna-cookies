@@ -109,3 +109,10 @@ export const IconAt = (p: Props) => (
 )
 
 export const IconPin = (p: Props) => IconMap(p)
+
+export const IconCamera = (p: Props) => (
+  <Base {...p}>
+    <path d="M4 8.5h3.2L8.8 6h6.4l1.6 2.5H20a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 19.5H4A1.5 1.5 0 0 1 2.5 18v-8A1.5 1.5 0 0 1 4 8.5Z" />
+    <circle cx="12" cy="13.5" r="3.2" />
+  </Base>
+)
