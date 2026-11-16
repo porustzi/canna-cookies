@@ -32,7 +32,7 @@ export function LangSwitch({ compact = false }: { compact?: boolean }) {
             aria-pressed={active}
             className={`rounded-full font-display text-[10.5px] font-medium tracking-[0.14em] transition-all duration-300 sm:text-[11px] sm:tracking-[0.16em] ${
               compact ? 'px-3 py-1.5' : 'px-2.5 py-1.5 sm:px-3'
-            } ${active ? 'bg-white/10 text-snow shadow-[0_0_18px_-6px_rgba(0,217,232,0.8)]' : 'text-mist hover:text-snow'}`}
+            } ${active ? 'bg-white/10 text-snow shadow-[0_0_18px_-6px_rgba(0,200,255,0.8)]' : 'text-mist hover:text-snow'}`}
           >
             {l.label}
           </button>
@@ -96,7 +96,7 @@ export function Header() {
                 className={`cc-link font-display text-[12px] uppercase tracking-[0.18em] transition-colors duration-300 ${
                   active === id ? 'text-aqua' : 'text-mist hover:text-snow'
                 }`}
-                style={active === id ? { color: '#00D9E8' } : undefined}
+                style={active === id ? { color: '#00c8ff' } : undefined}
               >
                 {t.nav[key]}
               </a>

@@ -47,7 +47,7 @@ export function ComingSoon({ open, onClose }: { open: boolean; onClose: () => vo
             <div
               className="pointer-events-none absolute inset-0"
               style={{
-                background: 'radial-gradient(80% 100% at 50% 0%, rgba(0,217,232,0.16), transparent 65%)',
+                background: 'radial-gradient(80% 100% at 50% 0%, rgba(0,200,255,0.16), transparent 65%)',
               }}
             />
 

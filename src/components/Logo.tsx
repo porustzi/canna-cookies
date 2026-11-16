@@ -1,9 +1,9 @@
-export function Mark({ className = 'h-9 w-9' }: { className?: string }) {
-  return <img src="/mark.png" alt="" width={384} height={384} aria-hidden="true" className={className} />
+export function LeafIcon({ className = 'h-8 w-8' }: { className?: string }) {
+  return <img src="/leaf.png" alt="" width={384} height={384} className={className} />
 }
 
-export function BrandLogo({ className = '' }: { className?: string }) {
-  return <img src="/logo.png" alt="CANNA COOKIES" width={640} height={640} className={className} />
+export function Emblem({ className = 'h-9 w-9', alt = '' }: { className?: string; alt?: string }) {
+  return <img src="/logo.png" alt={alt} width={640} height={640} className={className} />
 }
 
 export function Wordmark({ className = '' }: { className?: string }) {
@@ -18,7 +18,7 @@ export function Wordmark({ className = '' }: { className?: string }) {
 export function Logo({ className = '', compact = false }: { className?: string; compact?: boolean }) {
   return (
     <span className={`inline-flex items-center gap-2.5 sm:gap-3 ${className}`}>
-      <Mark className="h-8 w-8 shrink-0" />
+      <LeafIcon className="h-8 w-8 shrink-0" />
       {compact ? (
         <span className="hidden min-[420px]:inline-flex">
           <Wordmark className="text-[15px]" />

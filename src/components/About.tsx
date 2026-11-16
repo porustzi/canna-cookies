@@ -1,7 +1,6 @@
 import { useSite } from '../site'
 import { Card, Reveal, Section, SectionHead } from './ui'
 import { IconArrow } from './Icons'
-import { BrandLogo } from './Logo'
 
 export function About() {
   const { t } = useSite()
@@ -43,7 +42,7 @@ export function About() {
                   className="pointer-events-none absolute inset-0 opacity-70"
                   style={{
                     background:
-                      'radial-gradient(120% 90% at 20% 0%, rgba(0,217,232,0.16), transparent 55%), radial-gradient(100% 80% at 90% 100%, rgba(22,207,192,0.14), transparent 60%)',
+                      'radial-gradient(120% 90% at 20% 0%, rgba(0,200,255,0.16), transparent 55%), radial-gradient(100% 80% at 90% 100%, rgba(89,230,255,0.14), transparent 60%)',
                   }}
                 />
                 <div className="cc-grid-lines pointer-events-none absolute inset-0 opacity-40" />
@@ -53,16 +52,14 @@ export function About() {
                   <span>21+ · CBD</span>
                 </div>
 
-                <div className="relative grid place-items-center py-8" aria-hidden="true">
-                  <div
-                    className="absolute h-40 w-40 rounded-full border border-white/10"
-                    style={{ animation: 'cc-float 7s ease-in-out infinite' }}
+                <div className="relative grid place-items-center py-6">
+                  <img
+                    src="/about-emblem.png"
+                    alt="CANNA COOKIES"
+                    width={1100}
+                    height={733}
+                    className="w-full max-w-[400px] drop-shadow-[0_0_50px_rgba(0,200,255,0.28)]"
                   />
-                  <div
-                    className="absolute h-52 w-52 rounded-full border border-dashed border-aqua/25"
-                    style={{ animation: 'cc-spin 40s linear infinite' }}
-                  />
-                  <BrandLogo className="relative h-52 w-auto" />
                 </div>
 
                 <div className="relative border-t border-white/8 pt-5">

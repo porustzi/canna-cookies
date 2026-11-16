@@ -2,6 +2,7 @@ import { useSite } from '../site'
 import { LANGS } from '../i18n'
 import { Logo } from './Logo'
 import { IconSend } from './Icons'
+import { MegaCookie } from './CookieDecor'
 
 const NAV = [
   { id: 'about', key: 'about' },
@@ -18,8 +19,9 @@ export function Footer() {
     <footer className="cc-noise relative overflow-hidden border-t border-white/8 bg-graphite/50">
       <div
         className="cc-glow"
-        style={{ width: 520, height: 320, bottom: -220, left: '30%', background: 'rgba(0,217,232,0.1)' }}
+        style={{ width: 520, height: 320, bottom: -220, left: '30%', background: 'rgba(0,200,255,0.1)' }}
       />
+      <MegaCookie className="right-[-130px] bottom-[-120px]" size={340} opacity={0.08} spin={95} />
 
       <div className="cc-shell relative z-10 pt-16 md:pt-20">
         <div className="flex flex-col gap-8 border-b border-white/8 pb-12 md:flex-row md:items-end md:justify-between">

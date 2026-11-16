@@ -14,7 +14,7 @@ export function Catalog() {
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(90% 120% at 85% 20%, rgba(0,217,232,0.14), transparent 60%), radial-gradient(70% 90% at 10% 90%, rgba(22,207,192,0.12), transparent 65%)',
+                  'radial-gradient(90% 120% at 85% 20%, rgba(0,200,255,0.14), transparent 60%), radial-gradient(70% 90% at 10% 90%, rgba(89,230,255,0.12), transparent 65%)',
               }}
             />
             <div className="cc-grid-lines pointer-events-none absolute inset-0 opacity-30" />

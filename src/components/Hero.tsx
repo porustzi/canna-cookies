@@ -1,7 +1,8 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useSite } from '../site'
 import { IconArrow, IconSend } from './Icons'
-import { Mark } from './Logo'
+import { Emblem } from './Logo'
+import { MegaCookie } from './CookieDecor'
 
 export function Hero() {
   const { t, openCatalog } = useSite()
@@ -22,12 +23,15 @@ export function Hero() {
           WebkitMaskImage: 'radial-gradient(ellipse 90% 70% at 50% 35%, black 10%, transparent 78%)',
         }}
       />
-      <div className="cc-glow" style={{ width: 540, height: 540, top: -170, right: -110, background: 'rgba(0,217,232,0.15)' }} />
-      <div className="cc-glow" style={{ width: 480, height: 480, bottom: -190, left: -140, background: 'rgba(22,207,192,0.12)' }} />
+      <div className="cc-glow" style={{ width: 540, height: 540, top: -170, right: -110, background: 'rgba(0,200,255,0.15)' }} />
+      <div className="cc-glow" style={{ width: 480, height: 480, bottom: -190, left: -140, background: 'rgba(89,230,255,0.12)' }} />
       <div
         className="cc-glow hidden md:block"
-        style={{ width: 300, height: 300, top: '42%', left: '38%', background: 'rgba(0,217,232,0.07)' }}
+        style={{ width: 300, height: 300, top: '42%', left: '38%', background: 'rgba(0,200,255,0.07)' }}
       />
+
+      <MegaCookie className="left-[-130px] top-[16%] hidden xl:block" size={380} opacity={0.07} spin={85} />
+      <MegaCookie className="right-[-110px] bottom-[110px] hidden xl:block" size={280} opacity={0.055} spin={110} glow={false} />
 
       <div
         className="pointer-events-none absolute right-[3%] top-1/2 hidden -translate-y-1/2 lg:block"
@@ -40,12 +44,16 @@ export function Hero() {
             className="absolute inset-9 rounded-full border border-dashed border-aqua/30"
             style={{ animation: reduce ? undefined : 'cc-spin 46s linear infinite' }}
           />
-          <div className="absolute inset-20 rounded-full bg-gradient-to-br from-aqua/12 via-transparent to-teal/10 shadow-[0_0_120px_-40px_rgba(0,217,232,0.9)]" />
+          <div className="absolute inset-20 rounded-full bg-gradient-to-br from-aqua/12 via-transparent to-teal/10 shadow-[0_0_120px_-40px_rgba(0,200,255,0.9)]" />
           <div className="absolute inset-0 grid place-items-center">
-            <Mark className="h-24 w-24" />
+            <div
+              className="absolute h-72 w-72 rounded-full"
+              style={{ background: 'radial-gradient(circle, rgba(0,200,255,0.3), transparent 65%)', filter: 'blur(30px)' }}
+            />
+            <Emblem className="relative h-40 w-40" />
           </div>
-          <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-aqua shadow-[0_0_18px_4px_rgba(0,217,232,0.7)]" />
-          <div className="absolute bottom-6 right-10 h-1.5 w-1.5 rounded-full bg-teal shadow-[0_0_14px_3px_rgba(22,207,192,0.7)]" />
+          <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-aqua shadow-[0_0_18px_4px_rgba(0,200,255,0.7)]" />
+          <div className="absolute bottom-6 right-10 h-1.5 w-1.5 rounded-full bg-teal shadow-[0_0_14px_3px_rgba(89,230,255,0.7)]" />
         </div>
       </div>
 

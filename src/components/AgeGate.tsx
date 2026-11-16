@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useSite } from '../site'
 import { IconLock } from './Icons'
-import { BrandLogo } from './Logo'
+import { Emblem } from './Logo'
 
 export function AgeGate({ mode, onAccept, onDeny }: { mode: 'gate' | 'denied'; onAccept: () => void; onDeny?: () => void }) {
   const { t } = useSite()
@@ -32,11 +32,11 @@ export function AgeGate({ mode, onAccept, onDeny }: { mode: 'gate' | 'denied'; o
     >
       <div
         className="cc-glow"
-        style={{ width: 520, height: 520, top: -180, right: -140, background: 'rgba(0,217,232,0.14)' }}
+        style={{ width: 520, height: 520, top: -180, right: -140, background: 'rgba(0,200,255,0.14)' }}
       />
       <div
         className="cc-glow"
-        style={{ width: 440, height: 440, bottom: -180, left: -120, background: 'rgba(22,207,192,0.1)' }}
+        style={{ width: 440, height: 440, bottom: -180, left: -120, background: 'rgba(89,230,255,0.1)' }}
       />
       <div className="cc-grid-lines pointer-events-none absolute inset-0 opacity-40" />
 
@@ -58,7 +58,7 @@ export function AgeGate({ mode, onAccept, onDeny }: { mode: 'gate' | 'denied'; o
             <IconLock className="h-6 w-6" />
           </div>
         ) : (
-          <BrandLogo className="mx-auto h-44 w-auto max-w-full" />
+          <Emblem alt="CANNA COOKIES" className="mx-auto h-44 w-44" />
         )}
 
         <span className="cc-eyebrow mt-6">{t.age.kicker}</span>

@@ -11,6 +11,7 @@ import { Catalog } from './components/Catalog'
 import { Faq } from './components/Faq'
 import { Contacts } from './components/Contacts'
 import { Footer } from './components/Footer'
+import { CookieParticles } from './components/CookieDecor'
 import { AgeGate } from './components/AgeGate'
 import { ComingSoon } from './components/ComingSoon'
 
@@ -138,6 +139,7 @@ export default function App({ initialLang }: { initialLang: Lang }) {
     <SiteContext.Provider value={value}>
       {age === 'ok' ? (
         <>
+          <CookieParticles />
           <Header />
           <main>
             <Hero />
