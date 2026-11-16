@@ -15,19 +15,6 @@ const PARTICLES: Spot[] = [
   { x: '74%', y: '30%', s: 11, o: 0.05, d: 0.9, dur: 8 },
 ]
 
-const CRUMBS = [
-  { x: '8%', y: '28%', s: 5 },
-  { x: '14%', y: '58%', s: 4 },
-  { x: '3%', y: '50%', s: 6 },
-  { x: '21%', y: '22%', s: 4 },
-  { x: '89%', y: '32%', s: 5 },
-  { x: '96%', y: '62%', s: 4 },
-  { x: '79%', y: '88%', s: 6 },
-  { x: '63%', y: '94%', s: 4 },
-  { x: '33%', y: '4%', s: 5 },
-  { x: '55%', y: '96%', s: 4 },
-]
-
 function CookieGlyph({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
@@ -67,20 +54,6 @@ export function CookieParticles() {
         >
           <CookieGlyph className="h-full w-full" />
         </div>
-      ))}
-      {CRUMBS.map((c, i) => (
-        <span
-          key={`crumb-${i}`}
-          className="absolute rounded-full bg-aqua"
-          style={{
-            left: c.x,
-            top: c.y,
-            width: c.s,
-            height: c.s,
-            opacity: 0.4,
-            boxShadow: '0 0 10px rgba(0,200,255,0.6)',
-          }}
-        />
       ))}
     </div>
   )
