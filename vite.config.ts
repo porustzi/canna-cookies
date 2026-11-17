@@ -16,6 +16,7 @@ export default defineConfig({
         cs: entry('cs/index.html'),
         en: entry('en/index.html'),
         ru: entry('ru/index.html'),
+        admin: entry('admin/index.html'),
       },
     },
   },

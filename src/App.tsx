@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SiteContext } from './site'
 import { DICTS, SEO, SITE_URL, parseLang } from './i18n'
 import type { Lang } from './i18n'
+import { applyOverrides, fetchOverrides } from './content'
+import type { ContentOverrides } from './content'
 import { Header } from './components/Header'
 import { Hero } from './components/Hero'
 import { About } from './components/About'
@@ -67,8 +69,23 @@ export default function App({ initialLang }: { initialLang: Lang }) {
   const [lang, setLang] = useState<Lang>(initialLang)
   const [age, setAge] = useState<AgeState>(readAge)
   const [catalogOpen, setCatalogOpen] = useState(false)
+  const [overrides, setOverrides] = useState<ContentOverrides | null>(null)
 
-  const t = DICTS[lang]
+  const t = useMemo(() => applyOverrides(DICTS[lang], overrides, lang), [lang, overrides])
+  const images = useMemo(
+    () => ({ about: overrides?.images?.about ?? null, hero: overrides?.images?.hero ?? null }),
+    [overrides],
+  )
+
+  useEffect(() => {
+    let alive = true
+    void fetchOverrides().then((data) => {
+      if (alive && data) setOverrides(data)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   useEffect(() => {
     const seo = SEO[lang]
@@ -131,8 +148,8 @@ export default function App({ initialLang }: { initialLang: Lang }) {
   const closeCatalog = useCallback(() => setCatalogOpen(false), [])
 
   const value = useMemo(
-    () => ({ lang, t, switchLang, openCatalog }),
-    [lang, t, switchLang, openCatalog],
+    () => ({ lang, t, images, switchLang, openCatalog }),
+    [lang, t, images, switchLang, openCatalog],
   )
 
   return (

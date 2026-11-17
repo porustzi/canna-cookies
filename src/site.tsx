@@ -4,6 +4,7 @@ import type { Dict, Lang } from './i18n'
 export interface SiteValue {
   lang: Lang
   t: Dict
+  images: { about: string | null; hero: string | null }
   switchLang: (lang: Lang) => void
   openCatalog: () => void
 }

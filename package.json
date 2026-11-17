@@ -9,6 +9,7 @@
                     "lint":  "oxlint",
                     "preview":  "vite preview",
                     "deploy":  "wrangler pages deploy dist --project-name=canna-cookies",
+                    "dev:pages":  "npm run build && wrangler pages dev dist --port 8788",
                     "check:visual":  "node scripts/visual-check.mjs"
                 },
     "dependencies":  {

@@ -2,8 +2,8 @@ export function LeafIcon({ className = 'h-8 w-8' }: { className?: string }) {
   return <img src="/leaf.png" alt="" width={384} height={384} className={className} />
 }
 
-export function Emblem({ className = 'h-9 w-9', alt = '' }: { className?: string; alt?: string }) {
-  return <img src="/logo.png" alt={alt} width={640} height={640} className={className} />
+export function Emblem({ className = 'h-9 w-9', alt = '', src = '/logo.png' }: { className?: string; alt?: string; src?: string }) {
+  return <img src={src} alt={alt} width={640} height={640} className={className} />
 }
 
 export function Wordmark({ className = '' }: { className?: string }) {

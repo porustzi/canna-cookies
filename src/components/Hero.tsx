@@ -5,7 +5,7 @@ import { Emblem } from './Logo'
 import { MegaCookie } from './CookieDecor'
 
 export function Hero() {
-  const { t, openCatalog } = useSite()
+  const { t, images, openCatalog } = useSite()
   const reduce = useReducedMotion()
 
   const line = (delay: number) => ({
@@ -50,7 +50,7 @@ export function Hero() {
               className="absolute h-72 w-72 rounded-full"
               style={{ background: 'radial-gradient(circle, rgba(0,200,255,0.3), transparent 65%)', filter: 'blur(30px)' }}
             />
-            <Emblem className="relative h-40 w-40" />
+            <Emblem className="relative h-40 w-40" src={images.hero ?? undefined} />
           </div>
           <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 rounded-full bg-aqua shadow-[0_0_18px_4px_rgba(0,200,255,0.7)]" />
           <div className="absolute bottom-6 right-10 h-1.5 w-1.5 rounded-full bg-teal shadow-[0_0_14px_3px_rgba(89,230,255,0.7)]" />

@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useSite } from '../site'
-import { GALLERY_PHOTOS } from '../gallery'
+import { useGallery } from '../gallery'
 import { IconArrow, IconCamera, IconClose } from './Icons'
 
 export function Gallery({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useSite()
+  const photos = useGallery()
   const closeRef = useRef<HTMLButtonElement>(null)
   const [active, setActive] = useState<number | null>(null)
 
@@ -17,7 +18,7 @@ export function Gallery({ open, onClose }: { open: boolean; onClose: () => void 
   useEffect(() => {
     if (!open) return
     document.body.classList.add('cc-locked')
-    const count = GALLERY_PHOTOS.length
+    const count = photos.length
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (active !== null) setActive(null)
@@ -35,9 +36,9 @@ export function Gallery({ open, onClose }: { open: boolean; onClose: () => void 
       window.removeEventListener('keydown', onKey)
       window.clearTimeout(timer)
     }
-  }, [open, onClose, active])
+  }, [open, onClose, active, photos.length])
 
-  const hasPhotos = GALLERY_PHOTOS.length > 0
+  const hasPhotos = photos.length > 0
 
   return (
     <AnimatePresence>
@@ -99,7 +100,7 @@ export function Gallery({ open, onClose }: { open: boolean; onClose: () => void 
               ) : active === null ? (
                 <>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {GALLERY_PHOTOS.map((photo, i) => (
+                    {photos.map((photo, i) => (
                       <button
                         key={photo.src}
                         type="button"
@@ -126,25 +127,25 @@ export function Gallery({ open, onClose }: { open: boolean; onClose: () => void 
               ) : (
                 <div className="relative">
                   <img
-                    src={GALLERY_PHOTOS[active].src}
-                    alt={GALLERY_PHOTOS[active].alt}
+                    src={photos[active].src}
+                    alt={photos[active].alt}
                     className="mx-auto max-h-[58vh] w-auto max-w-full rounded-2xl border border-white/10 object-contain"
                   />
                   <div className="mt-5 flex items-center justify-center gap-4">
                     <button
                       type="button"
-                      onClick={() => setActive((active - 1 + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length)}
+                      onClick={() => setActive((active - 1 + photos.length) % photos.length)}
                       aria-label="Previous"
                       className="grid h-11 w-11 place-items-center rounded-full border border-white/12 bg-white/[0.04] text-mist transition hover:border-aqua/50 hover:text-aqua"
                     >
                       <IconArrow className="h-4 w-4 rotate-180" />
                     </button>
                     <span className="font-display text-[12px] tracking-[0.3em] text-mist/70">
-                      {active + 1} / {GALLERY_PHOTOS.length}
+                      {active + 1} / {photos.length}
                     </span>
                     <button
                       type="button"
-                      onClick={() => setActive((active + 1) % GALLERY_PHOTOS.length)}
+                      onClick={() => setActive((active + 1) % photos.length)}
                       aria-label="Next"
                       className="grid h-11 w-11 place-items-center rounded-full border border-white/12 bg-white/[0.04] text-mist transition hover:border-aqua/50 hover:text-aqua"
                     >
@@ -153,7 +154,7 @@ export function Gallery({ open, onClose }: { open: boolean; onClose: () => void 
                   </div>
                   <div className="mt-5 flex justify-center">
                     <button type="button" onClick={() => setActive(null)} className="cc-btn-ghost text-[12px]">
-                      ← {t.gallery.badge}
+                      в†ђ {t.gallery.badge}
                     </button>
                   </div>
                 </div>

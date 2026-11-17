@@ -3,7 +3,7 @@ import { Card, Reveal, Section, SectionHead } from './ui'
 import { IconArrow } from './Icons'
 
 export function About() {
-  const { t } = useSite()
+  const { t, images } = useSite()
 
   return (
     <Section id="about">
@@ -54,7 +54,7 @@ export function About() {
 
                 <div className="relative grid place-items-center py-6">
                   <img
-                    src="/about-emblem.png"
+                    src={images.about ?? '/about-emblem.png'}
                     alt="CANNA COOKIES"
                     width={1100}
                     height={733}

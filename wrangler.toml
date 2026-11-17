@@ -1,0 +1,7 @@
+name = "canna-cookies"
+compatibility_date = "2026-07-01"
+pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "SITE_CONTENT"
+id = "44ecff2ab22640138ec9b720e0c34b65"
