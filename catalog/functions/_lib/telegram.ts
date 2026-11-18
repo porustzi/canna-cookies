@@ -13,6 +13,15 @@ export type FeedbackPayload = {
   text: string
 }
 
+export const FEEDBACK_KEYBOARD = [
+  [
+    { text: '💬 Вопросы', callback_data: 'fb:question' },
+    { text: '⚠️ Жалобы', callback_data: 'fb:complaint' },
+    { text: '📋 Всё', callback_data: 'fb:all' },
+  ],
+  [{ text: '🗑 Очистить', callback_data: 'fb:clear' }],
+]
+
 /**
  * Заглушка: отправка заказа курьерам через их бота (отдельный токен, не трогаем).
  */
@@ -39,15 +48,7 @@ export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload
     feedback.text,
   ]
 
-  const reply_markup = JSON.stringify({
-    inline_keyboard: [
-      [
-        { text: '💬 Вопросы', callback_data: 'fb:question' },
-        { text: '⚠️ Жалобы', callback_data: 'fb:complaint' },
-        { text: '📋 Всё', callback_data: 'fb:all' },
-      ],
-    ],
-  })
+  const reply_markup = JSON.stringify({ inline_keyboard: FEEDBACK_KEYBOARD })
 
   try {
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {

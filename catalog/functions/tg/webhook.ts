@@ -1,4 +1,5 @@
 import type { Env, KvNamespace } from '../_lib/kv'
+import { FEEDBACK_KEYBOARD } from '../_lib/telegram'
 
 type FbItem = {
   id: string
@@ -19,13 +20,7 @@ type IncomingMessage = { chat: { id: number }; text?: string }
 
 type Update = { message?: IncomingMessage; callback_query?: CallbackQuery }
 
-const KEYBOARD = [
-  [
-    { text: '💬 Вопросы', callback_data: 'fb:question' },
-    { text: '⚠️ Жалобы', callback_data: 'fb:complaint' },
-    { text: '📋 Всё', callback_data: 'fb:all' },
-  ],
-]
+const replyMarkup = () => JSON.stringify({ inline_keyboard: FEEDBACK_KEYBOARD })
 
 const WELCOME = [
   'Бот поддержки CANNA COOKIES 🍪',
@@ -129,6 +124,33 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
       await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id })
       return new Response('ok')
     }
+
+    if (cb.data === 'fb:clear') {
+      let count = 0
+      const store = env.CATALOG
+      if (store) {
+        try {
+          const listed = await store.list({ prefix: 'fb:', limit: 200 })
+          await Promise.all(
+            listed.keys.map(async (k) => {
+              await store.delete(k.name)
+              count += 1
+            }),
+          )
+        } catch {
+          /* KV недоступен */
+        }
+      }
+      await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id, text: `🗑 Удалено обращений: ${count}` })
+      await tg(token, 'editMessageText', {
+        chat_id: cb.message.chat.id,
+        message_id: cb.message.message_id,
+        text: `🗑 Очищено · удалено ${count} шт.\n\nСписок пуст 🙌`,
+        reply_markup: replyMarkup(),
+      })
+      return new Response('ok')
+    }
+
     const spec =
       cb.data === 'fb:question'
         ? { title: '💬 Вопросы', type: 'question' }
@@ -143,7 +165,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
       chat_id: cb.message.chat.id,
       message_id: cb.message.message_id,
       text: formatList(filtered, spec.title),
-      reply_markup: JSON.stringify({ inline_keyboard: KEYBOARD }),
+      reply_markup: replyMarkup(),
     })
     return new Response('ok')
   }
@@ -151,10 +173,9 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   if (!msg?.text || !isAdmin) return new Response('ok')
 
   const command = msg.text.trim().split(/[\s?]+/)[0].split('@')[0].toLowerCase()
-  const replyMarkup = JSON.stringify({ inline_keyboard: KEYBOARD })
 
   if (command === '/start' || command === '/help') {
-    await tg(token, 'sendMessage', { chat_id: chatId, text: WELCOME, reply_markup: replyMarkup })
+    await tg(token, 'sendMessage', { chat_id: chatId, text: WELCOME, reply_markup: replyMarkup() })
     return new Response('ok')
   }
 
@@ -163,7 +184,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     const items = await loadFeedback(env.CATALOG)
     const filtered = spec.type ? items.filter((i) => i.type === spec.type) : items
     filtered.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
-    await tg(token, 'sendMessage', { chat_id: chatId, text: formatList(filtered, spec.title), reply_markup: replyMarkup })
+    await tg(token, 'sendMessage', { chat_id: chatId, text: formatList(filtered, spec.title), reply_markup: replyMarkup() })
   }
 
   return new Response('ok')
