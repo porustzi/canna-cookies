@@ -2,12 +2,14 @@ export type KvNamespace = {
   get(key: string): Promise<string | null>
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>
   delete(key: string): Promise<void>
+  list(options?: { prefix?: string; limit?: number }): Promise<{ keys: { name: string }[]; list_complete?: boolean }>
 }
 
 export type Env = {
   CATALOG?: KvNamespace
   TELEGRAM_FEEDBACK_TOKEN?: string
   TELEGRAM_FEEDBACK_CHAT_ID?: string
+  TELEGRAM_WEBHOOK_SECRET?: string
 }
 
 export function kv(env: Env): KvNamespace | null {

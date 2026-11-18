@@ -39,11 +39,21 @@ export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload
     feedback.text,
   ]
 
+  const reply_markup = JSON.stringify({
+    inline_keyboard: [
+      [
+        { text: '💬 Вопросы', callback_data: 'fb:question' },
+        { text: '⚠️ Жалобы', callback_data: 'fb:complaint' },
+        { text: '📋 Всё', callback_data: 'fb:all' },
+      ],
+    ],
+  })
+
   try {
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: lines.join('\n') }),
+      body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), reply_markup }),
     })
   } catch {
     /* Telegram недоступен — обращение уже лежит в KV */
