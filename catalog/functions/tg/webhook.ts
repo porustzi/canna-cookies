@@ -118,13 +118,14 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     return new Response('ok')
   }
 
+  const adminId = env.TELEGRAM_FEEDBACK_CHAT_ID
   const cb = update.callback_query
   const msg = update.message
   const chatId = cb?.message?.chat.id ?? msg?.chat.id
-  if (chatId === undefined) return new Response('ok')
+  const isAdmin = Boolean(adminId) && chatId !== undefined && String(chatId) === adminId
 
   if (cb) {
-    if (!cb.message) {
+    if (!isAdmin || !cb.message) {
       await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id })
       return new Response('ok')
     }
@@ -147,7 +148,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     return new Response('ok')
   }
 
-  if (!msg?.text) return new Response('ok')
+  if (!msg?.text || !isAdmin) return new Response('ok')
 
   const command = msg.text.trim().split(/[\s?]+/)[0].split('@')[0].toLowerCase()
   const replyMarkup = JSON.stringify({ inline_keyboard: KEYBOARD })
