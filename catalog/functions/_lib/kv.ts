@@ -4,7 +4,11 @@ export type KvNamespace = {
   delete(key: string): Promise<void>
 }
 
-export type Env = { CATALOG?: KvNamespace }
+export type Env = {
+  CATALOG?: KvNamespace
+  TELEGRAM_FEEDBACK_TOKEN?: string
+  TELEGRAM_FEEDBACK_CHAT_ID?: string
+}
 
 export function kv(env: Env): KvNamespace | null {
   return env.CATALOG ?? null
