@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-white/8 bg-ink/88 backdrop-blur-md">
       <div className="mx-auto flex max-w-3xl items-center justify-between gap-2 px-4 py-3">
         <button type="button" onClick={() => go('catalog')} className="flex shrink-0 items-center gap-2" aria-label="CANNA COOKIES">
-          <img src="/favicon.svg" alt="" className="h-8 w-8" />
+          <img src="/cc.png" alt="" className="h-8 w-8" />
           <span className="hidden font-display text-[12.5px] font-semibold tracking-[0.2em] text-snow sm:block">
             CANNA <span className="text-mist">COOKIES</span>
           </span>

@@ -22,7 +22,10 @@ export function AgeGate({ t, onAgree }: { t: Dict; onAgree: () => void }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        <img src="/favicon.svg" alt="" className="mx-auto h-14 w-14" />
+        <div className="flex items-center justify-center gap-4">
+          <img src="/moon.png" alt="" className="h-20 w-auto" />
+          <img src="/cc.png" alt="" className="h-14 w-14" />
+        </div>
 
         <span className="mt-5 inline-block rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 font-display text-[10px] uppercase tracking-[0.26em] text-mist">
           {t.age.badge}

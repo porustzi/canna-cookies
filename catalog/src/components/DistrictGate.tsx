@@ -98,7 +98,7 @@ export function DistrictGate({
         style={{ background: 'radial-gradient(70% 50% at 50% 0%, rgba(0,200,255,0.10), transparent 65%)' }}
       />
       <div className="cc-card relative w-full max-w-md p-7">
-        <img src="/favicon.svg" alt="" className="mb-4 h-10 w-10" />
+        <img src="/cc.png" alt="" className="mb-4 h-10 w-10" />
         <Form t={t} data={data} zone={zone} onSave={onSave} />
       </div>
     </div>

@@ -1,1 +1,1 @@
-export const CATALOG_URL = 'https://canna-cookies-catalog.pages.dev/'
+export const CATALOG_URL = 'https://t.me/cannacookies_bot'
