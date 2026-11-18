@@ -1,4 +1,4 @@
-export type ContactCard = { label: string; value: string; status: string }
+export type ContactCard = { label: string; value: string; status: string; href?: string }
 export type ContactsData = { cards: ContactCard[]; note: string }
 export type GalleryItem = { id: string; alt: string; created: number; mime: string; url: string }
 

@@ -1,0 +1,110 @@
+import { DEFAULT_CATALOG, type Product } from '../_lib/defaults'
+import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
+import { clearFailures, isRateLimited, recordFailure } from '../_lib/ratelimit'
+import { sendOrderToTelegram } from '../_lib/telegram'
+
+type RawLine = { productId?: unknown; weight?: unknown; qty?: unknown }
+
+type RawOrder = {
+  items?: unknown
+  districtId?: unknown
+  address?: unknown
+  name?: unknown
+  phone?: unknown
+  payment?: unknown
+  comment?: unknown
+  website?: unknown
+}
+
+const TTL = 7776000 // 90 дней
+
+function orderId(): string {
+  const time = Date.now().toString(36).toUpperCase()
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase()
+  return `CC-${time}${rand}`
+}
+
+export async function onRequestPost(context: { request: Request; env: Env }): Promise<Response> {
+  const { request, env } = context
+  const ip = clientIp(request)
+
+  if (await isRateLimited(env, 'order', ip)) {
+    return json({ error: 'rate-limited' }, 429, { 'retry-after': '900' })
+  }
+
+  const body = await readBody<RawOrder>(request)
+  if (!body) return json({ error: 'bad-payload' }, 400)
+
+  if (typeof body.website === 'string' && body.website.trim() !== '') {
+    // honeypot — молча принимаем, ничего не сохраняем
+    return json({ ok: true, id: '—', grand: 0 })
+  }
+
+  const fail = async (): Promise<Response> => {
+    await recordFailure(env, 'order', ip)
+    return json({ error: 'bad-payload' }, 400)
+  }
+
+  const name = str(body.name, 100)
+  const phoneRaw = str(body.phone, 40)
+  const address = str(body.address, 300)
+  const districtId = typeof body.districtId === 'string' ? body.districtId.slice(0, 60) : ''
+  const payment = typeof body.payment === 'string' ? body.payment.slice(0, 100) : ''
+  const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
+
+  if (!name || name.length < 2) return fail()
+  if (!phoneRaw || phoneRaw.replace(/\D/g, '').length < 6) return fail()
+  if (!address || address.length < 3) return fail()
+
+  if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) return fail()
+
+  const products = await readJson<Product[]>(env, 'catalog:products', DEFAULT_CATALOG.products)
+  const districts = await readJson(env, 'catalog:districts', DEFAULT_CATALOG.districts)
+
+  const lines: { productId: string; name: string; weight: string; price: number; qty: number }[] = []
+  let total = 0
+
+  for (const raw of body.items as RawLine[]) {
+    const productId = str(raw.productId, 60)
+    const weightLabel = str(raw.weight, 40)
+    const qty = int(raw.qty, 1, 99)
+    if (!productId || !weightLabel || qty === null) return fail()
+
+    const product = products.find((p) => p.id === productId)
+    if (!product) return fail()
+    const weight = product.weights.find((w) => w.label === weightLabel)
+    if (!weight) return fail()
+
+    lines.push({ productId, name: product.name, weight: weightLabel, price: weight.price, qty })
+    total += weight.price * qty
+  }
+
+  const district = districts.find((d) => d.id === districtId)
+  const delivery = district ? district.fee : 0
+  const grand = total + delivery
+
+  const id = orderId()
+  const order = {
+    id,
+    createdAt: new Date().toISOString(),
+    status: 'new',
+    items: lines,
+    district: district
+      ? { id: district.id, name: district.name, fee: district.fee }
+      : { id: districtId, name: districtId || '—', fee: 0 },
+    address,
+    name,
+    phone: phoneRaw,
+    payment,
+    comment,
+    total,
+    delivery,
+    grand,
+  }
+
+  await putJson(env, `order:${id}`, order, TTL)
+  await clearFailures(env, 'order', ip)
+  await sendOrderToTelegram(env, { id, grand })
+
+  return json({ ok: true, id, grand })
+}

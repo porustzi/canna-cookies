@@ -109,7 +109,7 @@ export function ContactsEditor({ state, onSaved }: { state: AdminState; onSaved:
 
       <div className="grid gap-4">
         {data.cards.map((card, i) => (
-          <div key={i} className="cc-card grid gap-3 p-5 md:grid-cols-[1fr_1.4fr_1fr_auto]">
+          <div key={i} className="cc-card grid gap-3 p-5 md:grid-cols-[1fr_1.4fr_1fr_1fr_auto]">
             <label className="block">
               <span className="cc-eyebrow">Подпись</span>
               <input
@@ -135,6 +135,15 @@ export function ContactsEditor({ state, onSaved }: { state: AdminState; onSaved:
                 onChange={(e) => setCard(i, { status: e.target.value })}
                 className="mt-2 w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-[14.5px] text-snow outline-none focus:border-aqua/60"
                 placeholder="Ve fázi 2"
+              />
+            </label>
+            <label className="block">
+              <span className="cc-eyebrow">Ссылка</span>
+              <input
+                value={card.href ?? ''}
+                onChange={(e) => setCard(i, { href: e.target.value || undefined })}
+                className="mt-2 w-full rounded-xl border border-white/12 bg-white/[0.03] px-4 py-3 text-[14.5px] text-snow outline-none focus:border-aqua/60"
+                placeholder="https://t.me/…"
               />
             </label>
             <div className="flex items-end gap-2">

@@ -162,8 +162,9 @@ function Dashboard({ state, onRefresh }: { state: AdminState; onRefresh: () => v
       <section className="cc-card p-6 md:col-span-2 lg:col-span-3">
         <span className="cc-eyebrow">Статус</span>
         <p className="mt-4 text-[15px] leading-relaxed text-mist">
-          Этап 1 — сайт-визитка (CS/EN/RU, гейт 21+, Telegram-заглушки) опубликован. Админка: контакты, галерея и
-          изображения редактируются без деплоя. Каталог в Telegram — этап 3.
+          Этап 3 — сайт (CS/EN/RU, гейт 21+) и каталог в Telegram (Mini App) опубликованы. Админка: контакты, галерея и
+          изображения редактируются без деплоя. Заказы из каталога пока сохраняются в KV — отправка в Telegram
+          подключается следующим шагом.
         </p>
       </section>
     </div>

@@ -29,13 +29,24 @@ export function Contacts() {
                   </div>
                   <div className="mt-8">
                     <span className="font-display text-[11px] uppercase tracking-[0.26em] text-mist/60">{card.label}</span>
-                    <p
-                      className={`mt-2 font-display leading-tight ${
-                        placeholder ? 'text-[34px] text-white/15' : 'text-[20px] text-snow'
-                      }`}
-                    >
-                      {card.value}
-                    </p>
+                    {card.href && !placeholder ? (
+                      <a
+                        href={card.href}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-2 block font-display text-[20px] leading-tight text-snow transition-colors hover:text-aqua"
+                      >
+                        {card.value}
+                      </a>
+                    ) : (
+                      <p
+                        className={`mt-2 font-display leading-tight ${
+                          placeholder ? 'text-[34px] text-white/15' : 'text-[20px] text-snow'
+                        }`}
+                      >
+                        {card.value}
+                      </p>
+                    )}
                   </div>
                 </Card>
               </Reveal>

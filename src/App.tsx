@@ -15,7 +15,6 @@ import { Contacts } from './components/Contacts'
 import { Footer } from './components/Footer'
 import { CookieParticles } from './components/CookieDecor'
 import { AgeGate } from './components/AgeGate'
-import { ComingSoon } from './components/ComingSoon'
 
 const AGE_KEY = 'cc_age_v1'
 const ALL_LANGS: Lang[] = ['cs', 'en', 'ru']
@@ -68,7 +67,6 @@ function setLink(rel: string, href: string, attr?: { name: string; value: string
 export default function App({ initialLang }: { initialLang: Lang }) {
   const [lang, setLang] = useState<Lang>(initialLang)
   const [age, setAge] = useState<AgeState>(readAge)
-  const [catalogOpen, setCatalogOpen] = useState(false)
   const [overrides, setOverrides] = useState<ContentOverrides | null>(null)
 
   const t = useMemo(() => applyOverrides(DICTS[lang], overrides, lang), [lang, overrides])
@@ -144,12 +142,9 @@ export default function App({ initialLang }: { initialLang: Lang }) {
     setAge('denied')
   }, [])
 
-  const openCatalog = useCallback(() => setCatalogOpen(true), [])
-  const closeCatalog = useCallback(() => setCatalogOpen(false), [])
-
   const value = useMemo(
-    () => ({ lang, t, images, switchLang, openCatalog }),
-    [lang, t, images, switchLang, openCatalog],
+    () => ({ lang, t, images, switchLang }),
+    [lang, t, images, switchLang],
   )
 
   return (
@@ -172,7 +167,6 @@ export default function App({ initialLang }: { initialLang: Lang }) {
       ) : (
         <AgeGate mode={age === 'denied' ? 'denied' : 'gate'} onAccept={acceptAge} onDeny={age === 'gate' ? denyAge : undefined} />
       )}
-      <ComingSoon open={catalogOpen} onClose={closeCatalog} />
     </SiteContext.Provider>
   )
 }

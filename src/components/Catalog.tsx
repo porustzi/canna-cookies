@@ -1,9 +1,10 @@
 import { useSite } from '../site'
+import { CATALOG_URL } from '../config'
 import { Card, Reveal, Section } from './ui'
 import { IconSend } from './Icons'
 
 export function Catalog() {
-  const { t, openCatalog } = useSite()
+  const { t } = useSite()
 
   return (
     <Section id="catalog">
@@ -32,12 +33,12 @@ export function Catalog() {
               </div>
 
               <div className="flex flex-col items-start gap-4 md:items-end">
-                <button type="button" onClick={openCatalog} className="cc-btn-primary w-full md:w-auto">
+                <a href={CATALOG_URL} className="cc-btn-primary w-full md:w-auto">
                   <IconSend className="h-4 w-4" />
                   {t.catalog.cta}
-                </button>
+                </a>
                 <span className="font-display text-[10.5px] uppercase tracking-[0.26em] text-mist/55">
-                  Telegram Mini App · Stage 3
+                  Telegram Mini App · Live
                 </span>
               </div>
             </div>

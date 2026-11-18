@@ -1,5 +1,6 @@
 import { useSite } from '../site'
 import { LANGS } from '../i18n'
+import { CATALOG_URL } from '../config'
 import { Logo } from './Logo'
 import { IconSend } from './Icons'
 import { MegaCookie } from './CookieDecor'
@@ -13,7 +14,7 @@ const NAV = [
 ] as const
 
 export function Footer() {
-  const { t, lang, switchLang, openCatalog } = useSite()
+  const { t, lang, switchLang } = useSite()
 
   return (
     <footer className="cc-noise relative overflow-hidden border-t border-white/8 bg-graphite/50">
@@ -31,10 +32,10 @@ export function Footer() {
               {t.footer.tagline}
             </p>
           </div>
-          <button type="button" onClick={openCatalog} className="cc-btn-primary w-full sm:w-auto">
+          <a href={CATALOG_URL} className="cc-btn-primary w-full sm:w-auto">
             <IconSend className="h-4 w-4" />
             {t.header.catalog}
-          </button>
+          </a>
         </div>
 
         <div className="grid gap-10 py-12 md:grid-cols-3">

@@ -6,7 +6,6 @@ export interface SiteValue {
   t: Dict
   images: { about: string | null; hero: string | null }
   switchLang: (lang: Lang) => void
-  openCatalog: () => void
 }
 
 export const SiteContext = createContext<SiteValue | null>(null)

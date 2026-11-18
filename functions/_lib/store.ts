@@ -1,6 +1,6 @@
 import type { Env } from './auth'
 
-export type ContactCard = { label: string; value: string; status: string }
+export type ContactCard = { label: string; value: string; status: string; href?: string }
 export type ContactsData = { cards: ContactCard[]; note: string }
 export type GalleryItem = { id: string; alt: string; created: number }
 export type ImageName = 'about' | 'hero'
@@ -65,10 +65,16 @@ export function validateContacts(body: unknown): ContactsData | null {
   const cards: ContactCard[] = []
   for (const item of b.cards) {
     if (!item || typeof item !== 'object') return null
-    const c = item as { label?: unknown; value?: unknown; status?: unknown }
+    const c = item as { label?: unknown; value?: unknown; status?: unknown; href?: unknown }
     if (typeof c.label !== 'string' || typeof c.value !== 'string' || typeof c.status !== 'string') return null
     if (c.label.length > 60 || c.value.length > 160 || c.status.length > 60) return null
-    cards.push({ label: c.label, value: c.value, status: c.status })
+    if (c.href !== undefined && c.href !== null && c.href !== '') {
+      if (typeof c.href !== 'string' || c.href.length > 500) return null
+      if (!/^https?:\/\//.test(c.href)) return null
+      cards.push({ label: c.label, value: c.value, status: c.status, href: c.href })
+    } else {
+      cards.push({ label: c.label, value: c.value, status: c.status })
+    }
   }
   if (typeof b.note !== 'string' || b.note.length > 600) return null
   return { cards, note: b.note }

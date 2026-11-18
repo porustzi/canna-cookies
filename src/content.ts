@@ -4,6 +4,7 @@ export interface ContactCardData {
   label: string
   value: string
   status: string
+  href?: string
 }
 
 export interface ContactsOverride {

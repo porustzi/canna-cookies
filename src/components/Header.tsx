@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useSite } from '../site'
 import { LANGS } from '../i18n'
+import { CATALOG_URL } from '../config'
 import { Logo } from './Logo'
 import { IconClose, IconMenu, IconSend } from './Icons'
 
@@ -43,7 +44,7 @@ export function LangSwitch({ compact = false }: { compact?: boolean }) {
 }
 
 export function Header() {
-  const { t, lang, openCatalog } = useSite()
+  const { t, lang } = useSite()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [active, setActive] = useState<string>('')
@@ -105,14 +106,13 @@ export function Header() {
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <LangSwitch />
-            <button
-              type="button"
-              onClick={openCatalog}
+            <a
+              href={CATALOG_URL}
               className="cc-btn-primary hidden px-5 py-3 text-[11px] sm:inline-flex"
             >
               <IconSend className="h-4 w-4" />
               {t.header.catalog}
-            </button>
+            </a>
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -165,17 +165,14 @@ export function Header() {
               </nav>
 
               <div className="flex flex-col gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    openCatalog()
-                  }}
+                <a
+                  href={CATALOG_URL}
+                  onClick={() => setMenuOpen(false)}
                   className="cc-btn-primary w-full"
                 >
                   <IconSend className="h-4 w-4" />
                   {t.header.catalog}
-                </button>
+                </a>
                 <LangSwitch />
                 <p className="text-center font-display text-[10px] tracking-[0.3em] text-mist/50">
                   DON'T PANIC, IT'S ORGANIC · 21+

@@ -1,11 +1,12 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { useSite } from '../site'
+import { CATALOG_URL } from '../config'
 import { IconArrow, IconSend } from './Icons'
 import { Emblem } from './Logo'
 import { MegaCookie } from './CookieDecor'
 
 export function Hero() {
-  const { t, images, openCatalog } = useSite()
+  const { t, images } = useSite()
   const reduce = useReducedMotion()
 
   const line = (delay: number) => ({
@@ -103,10 +104,10 @@ export function Hero() {
             transition={{ duration: 0.9, delay: 0.62, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-wrap items-center gap-4"
           >
-            <button type="button" onClick={openCatalog} className="cc-btn-primary">
+            <a href={CATALOG_URL} className="cc-btn-primary">
               <IconSend className="h-4 w-4" />
               {t.hero.cta}
-            </button>
+            </a>
             <a href="#about" className="cc-btn-ghost">
               {t.hero.secondary}
               <IconArrow className="h-4 w-4" />

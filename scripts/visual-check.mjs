@@ -95,14 +95,11 @@ for (const l of ['en', 'ru']) {
   await q.close()
 }
 
-// 9. FAQ accordion + catalog modal
+// 9. FAQ accordion + catalog link
 const p2 = await page(ctx, `${BASE}/cs/`)
-await p2.click('header button:has-text("OPEN CATALOG")')
-await p2.waitForTimeout(600)
-await p2.screenshot({ path: `${OUT}/06-modal.png` })
-console.log('modal title:', await p2.textContent('#catalog-modal-title'))
-await p2.keyboard.press('Escape')
-await p2.waitForTimeout(400)
+const catalogHref = await p2.getAttribute('header a:has-text("OPEN CATALOG")', 'href')
+console.log('catalog link:', catalogHref)
+await p2.screenshot({ path: `${OUT}/06-catalog-link.png` })
 
 await p2.locator('#faq').scrollIntoViewIfNeeded()
 await p2.waitForTimeout(900)
@@ -115,7 +112,6 @@ await p2.screenshot({ path: `${OUT}/07-faq.png` })
 // 10. mobile
 const m = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
 const mp = await page(m, `${BASE}/cs/`)
-await mp.click('.cc-btn-primary')
 await mp.waitForTimeout(1000)
 await mp.screenshot({ path: `${OUT}/08-mobile-hero.png` })
 await mp.click('header button[aria-label="Menu"]')

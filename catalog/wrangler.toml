@@ -1,0 +1,7 @@
+name = "canna-cookies-catalog"
+compatibility_date = "2026-07-01"
+pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "CATALOG"
+id = "c2c8f48f8a034b48a21dd74ff078a970"

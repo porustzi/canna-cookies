@@ -71,7 +71,7 @@ export interface Dict {
     eyebrow: string
     title: string
     lead: string
-    cards: { label: string; value: string; status: string }[]
+    cards: { label: string; value: string; status: string; href?: string }[]
     note: string
   }
   footer: {
@@ -95,7 +95,6 @@ export interface Dict {
     deniedTitle: string
     deniedText: string
   }
-  modal: { badge: string; title: string; text: string; close: string }
   gallery: { badge: string; title: string; text: string; close: string }
 }
 
@@ -111,7 +110,7 @@ const cs: Dict = {
     secondary: 'Objevte značku',
     scroll: 'SCROLL',
     strip: ["DON'T PANIC", "IT'S ORGANIC", '21+ ONLY', 'CZECH REPUBLIC', 'CALIFARMS PARTNER'],
-    teaser: 'Katalog v Telegramu — připravujeme',
+    teaser: 'Katalog v Telegramu — už živě',
   },
   about: {
     eyebrow: '01 — About us',
@@ -139,7 +138,7 @@ const cs: Dict = {
       { icon: 'shield', title: 'Kontrola kvality', text: 'Spolupracujeme s osvědčenými dodavateli a postupy, které dávají smysl.' },
       { icon: 'map', title: 'Fyzický bod', text: 'Máme vlastní prodejní místo v ČR — vše legálně, kontrolovaně a podle místních pravidel.', gallery: true, cta: 'Prohlédnout fotky' },
       { icon: 'lock', title: 'Pouze 21+', text: 'Prodej výhradně plnoletým — hranici 21 let jsme stanovili sami.' },
-      { icon: 'send', title: 'Katalog v Telegramu', text: 'Připravujeme Telegram Mini App s katalogem, košíkem a objednávkami.' },
+      { icon: 'send', title: 'Katalog v Telegramu', text: 'Telegram Mini App s katalogem, košíkem a objednávkami — už je online.' },
     ],
   },
   delivery: {
@@ -173,9 +172,9 @@ const cs: Dict = {
   catalog: {
     eyebrow: '04 — Catalog',
     title: 'Katalog v Telegramu',
-    text: 'Katalog, košík a objednávky budou součástí Telegram Mini App. Pracujeme na tom — první verze dorazí ve fázi 3.',
+    text: 'Katalog, košík a objednávky běží v Telegram Mini App. Otevřete aplikaci a objednejte během pár klepnutí.',
     cta: 'OPEN CATALOG',
-    badge: 'Coming soon',
+    badge: 'Už živě',
   },
   faq: {
     eyebrow: '05 — FAQ',
@@ -192,7 +191,7 @@ const cs: Dict = {
       },
       {
         q: 'Kde si produkty koupím?',
-        a: 'Připravujeme katalog v Telegramu s objednávkami a doručením. Spuštění oznámíme — žádná funkce nebude nefunkční.',
+        a: 'V Telegram Mini App — katalog, košík a objednávky. Otevřete katalog a vyberte si, co potřebujete.',
       },
       {
         q: 'Jak probíhá doručení?',
@@ -208,7 +207,7 @@ const cs: Dict = {
       },
       {
         q: 'Bude plný e-shop?',
-        a: 'Ano — v plánu je obchod přes Telegram Mini App (katalog, košík, objednávky) a následně backend s administrací.',
+        a: 'Ano — obchod běží přes Telegram Mini App (katalog, košík, objednávky), backend s administrací připravujeme.',
       },
     ],
   },
@@ -218,7 +217,7 @@ const cs: Dict = {
     lead: 'Jsme na příjmu. Kontaktní údaje doplníme spolu s finálním designem.',
     cards: [
       { label: 'E-mail', value: '—', status: 'Ve fázi 2' },
-      { label: 'Telegram', value: '—', status: 'Ve fázi 2' },
+      { label: 'Telegram', value: '@cannacookies_bot', status: 'Aktivní', href: 'https://t.me/cannacookies_bot' },
       { label: 'Instagram', value: '—', status: 'Ve fázi 2' },
       { label: 'Sídlo', value: 'Česká republika', status: 'Adresa ve fázi 2' },
     ],
@@ -233,7 +232,7 @@ const cs: Dict = {
     legal3: 'Značka: CANNA COOKIES · Distribuce: CALIFARMS',
     gdpr: 'GDPR: web používá pouze nezbytné lokální úložiště (jazyk, potvrzení věku). Žádné sledovací cookies.',
     rights: '© 2026 CANNA COOKIES. Všechna práva vyhrazena.',
-    stage: 'Etapa 1 — prezentace',
+    stage: 'Etapa 3 — katalog v Telegramu',
   },
   age: {
     kicker: 'Vstup pouze pro dospělé',
@@ -244,12 +243,6 @@ const cs: Dict = {
     no: 'NE, ODEJÍT',
     deniedTitle: 'Přístup omezen',
     deniedText: 'Obsah je dostupný pouze plnoletým návštěvníkům. Pokud je vám alespoň 21 let, můžete potvrdit vstup.',
-  },
-  modal: {
-    badge: 'Coming soon',
-    title: 'Katalog připravujeme',
-    text: 'Telegram Mini App s katalogem, košíkem a objednávkami je ve vývoji (etapa 3). Spuštění oznámíme na našich kanálech.',
-    close: 'Rozumím',
   },
   gallery: {
     badge: 'Galerie',
@@ -271,7 +264,7 @@ const en: Dict = {
     secondary: 'Discover the brand',
     scroll: 'SCROLL',
     strip: ["DON'T PANIC", "IT'S ORGANIC", '21+ ONLY', 'CZECH REPUBLIC', 'CALIFARMS PARTNER'],
-    teaser: 'Telegram catalogue — coming soon',
+    teaser: 'Telegram catalogue — live now',
   },
   about: {
     eyebrow: '01 — About us',
@@ -299,7 +292,7 @@ const en: Dict = {
       { icon: 'shield', title: 'Quality control', text: 'We work with proven suppliers and procedures that make sense.' },
       { icon: 'map', title: 'Physical point', text: 'Our own point of sale in the CZ — everything is legal, controlled and by the local rules.', gallery: true, cta: 'View photos' },
       { icon: 'lock', title: '21+ only', text: 'Sales strictly to adults — we set the 21+ threshold ourselves.' },
-      { icon: 'send', title: 'Telegram catalogue', text: 'A Telegram Mini App with catalogue, cart and ordering is in the works.' },
+      { icon: 'send', title: 'Telegram catalogue', text: 'A Telegram Mini App with catalogue, cart and ordering — now live.' },
     ],
   },
   delivery: {
@@ -333,9 +326,9 @@ const en: Dict = {
   catalog: {
     eyebrow: '04 — Catalog',
     title: 'Catalogue in Telegram',
-    text: 'Catalogue, cart and orders will live inside a Telegram Mini App. We are building it — the first version arrives in stage 3.',
+    text: 'Catalogue, cart and orders live inside the Telegram Mini App. Open it and order in a few taps.',
     cta: 'OPEN CATALOG',
-    badge: 'Coming soon',
+    badge: 'Live now',
   },
   faq: {
     eyebrow: '05 — FAQ',
@@ -352,7 +345,7 @@ const en: Dict = {
       },
       {
         q: 'Where can I buy the products?',
-        a: 'We are preparing a Telegram catalogue with ordering and delivery. We will announce the launch — nothing will ship half-working.',
+        a: 'In the Telegram Mini App — catalogue, cart and ordering. Open the catalogue and pick what you need.',
       },
       {
         q: 'How does delivery work?',
@@ -368,7 +361,7 @@ const en: Dict = {
       },
       {
         q: 'Will there be a full shop?',
-        a: 'Yes — the plan is a store inside Telegram Mini App (catalogue, cart, orders), followed by a backend with an admin panel.',
+        a: 'Yes — the store runs inside the Telegram Mini App (catalogue, cart, orders); a backend with an admin panel comes next.',
       },
     ],
   },
@@ -378,7 +371,7 @@ const en: Dict = {
     lead: 'We are reachable. Contact details will be added together with the final design.',
     cards: [
       { label: 'E-mail', value: '—', status: 'Stage 2' },
-      { label: 'Telegram', value: '—', status: 'Stage 2' },
+      { label: 'Telegram', value: '@cannacookies_bot', status: 'Live', href: 'https://t.me/cannacookies_bot' },
       { label: 'Instagram', value: '—', status: 'Stage 2' },
       { label: 'HQ', value: 'Czech Republic', status: 'Address in stage 2' },
     ],
@@ -393,7 +386,7 @@ const en: Dict = {
     legal3: 'Brand: CANNA COOKIES · Distribution: CALIFARMS',
     gdpr: 'GDPR: the site only uses essential local storage (language, age confirmation). No tracking cookies.',
     rights: '© 2026 CANNA COOKIES. All rights reserved.',
-    stage: 'Stage 1 — presentation',
+    stage: 'Stage 3 — Telegram catalogue',
   },
   age: {
     kicker: 'Adults only',
@@ -404,12 +397,6 @@ const en: Dict = {
     no: 'NO, EXIT',
     deniedTitle: 'Access restricted',
     deniedText: 'Content is available to adults only. If you are at least 21 years old, you can confirm entry.',
-  },
-  modal: {
-    badge: 'Coming soon',
-    title: 'Catalogue in the works',
-    text: 'The Telegram Mini App with catalogue, cart and ordering is in development (stage 3). We will announce the launch on our channels.',
-    close: 'Got it',
   },
   gallery: {
     badge: 'Gallery',
@@ -431,7 +418,7 @@ const ru: Dict = {
     secondary: 'О бренде',
     scroll: 'SCROLL',
     strip: ["DON'T PANIC", "IT'S ORGANIC", '21+ ONLY', 'CZECH REPUBLIC', 'CALIFARMS PARTNER'],
-    teaser: 'Каталог в Telegram — уже в разработке',
+    teaser: 'Каталог в Telegram — уже работает',
   },
   about: {
     eyebrow: '01 — About us',
@@ -459,7 +446,7 @@ const ru: Dict = {
       { icon: 'shield', title: 'Контроль качества', text: 'Работаем с проверенными поставщиками и процессами, которые имеют смысл.' },
       { icon: 'map', title: 'Физическая точка', text: 'Собственная точка продаж в Чехии — всё легально, по местным правилам и под контролем.', gallery: true, cta: 'Смотреть фото' },
       { icon: 'lock', title: 'Только 21+', text: 'Продаём исключительно совершеннолетним — порог 21 года мы установили сами.' },
-      { icon: 'send', title: 'Каталог в Telegram', text: 'Готовим Telegram Mini App с каталогом, корзиной и оформлением заказов.' },
+      { icon: 'send', title: 'Каталог в Telegram', text: 'Telegram Mini App с каталогом, корзиной и заказами — уже работает.' },
     ],
   },
   delivery: {
@@ -493,9 +480,9 @@ const ru: Dict = {
   catalog: {
     eyebrow: '04 — Catalog',
     title: 'Каталог в Telegram',
-    text: 'Каталог, корзина и заказы станут частью Telegram Mini App. Мы это делаем — первая версия появится на 3-м этапе.',
+    text: 'Каталог, корзина и заказы — в Telegram Mini App. Открывайте приложение и оформляйте заказ в пару касаний.',
     cta: 'ОТКРЫТЬ КАТАЛОГ',
-    badge: 'Coming soon',
+    badge: 'Уже работает',
   },
   faq: {
     eyebrow: '05 — FAQ',
@@ -512,7 +499,7 @@ const ru: Dict = {
       },
       {
         q: 'Где купить продукты?',
-        a: 'Готовим каталог в Telegram с заказами и доставкой. О запуске сообщим — ничего не будет работать наполовину.',
+        a: 'В Telegram Mini App — каталог, корзина и заказы. Откройте каталог и выбирайте, что нужно.',
       },
       {
         q: 'Как работает доставка?',
@@ -528,7 +515,7 @@ const ru: Dict = {
       },
       {
         q: 'Будет ли полноценный магазин?',
-        a: 'Да — в планах магазин в Telegram Mini App (каталог, корзина, заказы), а затем backend с административной панелью.',
+        a: 'Да — магазин работает в Telegram Mini App (каталог, корзина, заказы), backend с административной панелью — следующий шаг.',
       },
     ],
   },
@@ -538,7 +525,7 @@ const ru: Dict = {
     lead: 'Мы на связи. Контактные данные добавим вместе с финальным дизайном.',
     cards: [
       { label: 'E-mail', value: '—', status: '2-й этап' },
-      { label: 'Telegram', value: '—', status: '2-й этап' },
+      { label: 'Telegram', value: '@cannacookies_bot', status: 'Открыт', href: 'https://t.me/cannacookies_bot' },
       { label: 'Instagram', value: '—', status: '2-й этап' },
       { label: 'Офис', value: 'Чехия', status: 'Адрес на 2-м этапе' },
     ],
@@ -553,7 +540,7 @@ const ru: Dict = {
     legal3: 'Бренд: CANNA COOKIES · Дистрибуция: CALIFARMS',
     gdpr: 'GDPR: сайт использует только необходимое локальное хранилище (язык, подтверждение возраста). Без отслеживающих cookie.',
     rights: '© 2026 CANNA COOKIES. Все права защищены.',
-    stage: 'Этап 1 — презентация',
+    stage: 'Этап 3 — каталог в Telegram',
   },
   age: {
     kicker: 'Только для взрослых',
@@ -564,12 +551,6 @@ const ru: Dict = {
     no: 'НЕТ, ВЫЙТИ',
     deniedTitle: 'Доступ ограничен',
     deniedText: 'Контент доступен только совершеннолетним. Если вам не менее 21 года, подтвердите вход.',
-  },
-  modal: {
-    badge: 'Coming soon',
-    title: 'Каталог в разработке',
-    text: 'Telegram Mini App с каталогом, корзиной и заказами в разработке (3-й этап). О запуске сообщим в наших каналах.',
-    close: 'Понятно',
   },
   gallery: {
     badge: 'Галерея',
@@ -585,19 +566,19 @@ export const SEO: Record<Lang, { title: string; description: string; locale: str
   cs: {
     title: "CANNA COOKIES — Prémiová CBD značka | DON'T PANIC, IT'S ORGANIC",
     description:
-      'CANNA COOKIES je samostatná prémiová CBD značka působící v České republice. DON’T PANIC, IT’S ORGANIC. Katalog v Telegramu připravujeme.',
+      'CANNA COOKIES je samostatná prémiová CBD značka působící v České republice. DON’T PANIC, IT’S ORGANIC. Katalog v Telegramu už běží.',
     locale: 'cs_CZ',
   },
   en: {
     title: "CANNA COOKIES — Premium CBD Brand | DON'T PANIC, IT'S ORGANIC",
     description:
-      'CANNA COOKIES is an independent premium CBD brand based in the Czech Republic. DON’T PANIC, IT’S ORGANIC. Telegram catalogue coming soon.',
+      'CANNA COOKIES is an independent premium CBD brand based in the Czech Republic. DON’T PANIC, IT’S ORGANIC. The Telegram catalogue is live.',
     locale: 'en_US',
   },
   ru: {
     title: "CANNA COOKIES — Премиальный CBD-бренд | DON'T PANIC, IT'S ORGANIC",
     description:
-      'CANNA COOKIES — самостоятельный премиальный CBD-бренд из Чехии. DON’T PANIC, IT’S ORGANIC. Каталог в Telegram уже в разработке.',
+      'CANNA COOKIES — самостоятельный премиальный CBD-бренд из Чехии. DON’T PANIC, IT’S ORGANIC. Каталог в Telegram уже работает.',
     locale: 'ru_RU',
   },
 }
