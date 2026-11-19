@@ -29,6 +29,8 @@ export async function onRequestGet(context: { request: Request; env: Env }): Pro
       grand: order.grand,
       payment: order.payment,
       district: order.district ? { name: order.district.name, fee: order.district.fee } : undefined,
+      assigned: Boolean(order.takenBy),
+      reviewed: Boolean(order.reviewed),
       items: order.items.map((it) => ({ name: it.name, weight: it.weight, price: it.price, qty: it.qty })),
     },
   })

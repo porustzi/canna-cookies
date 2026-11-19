@@ -103,6 +103,10 @@ export type Dict = {
     disputeOk: string
     disputeOkText: string
     disputeErr: string
+    receive: string
+    receiveConfirm: string
+    received: string
+    receiveErr: string
   }
   feedback: {
     title: string
@@ -232,6 +236,10 @@ const cs: Dict = {
     disputeOk: 'Spor odeslán do podpory',
     disputeOkText: 'Odpovíme v botu podpory.',
     disputeErr: 'Spor se nepodařilo odeslat.',
+    receive: 'Objednávku jsem dostal',
+    receiveConfirm: 'Potvrdit převzetí objednávky?',
+    received: '✓ Objednávka převzata',
+    receiveErr: 'Potvrzení se nepodařilo odeslat.',
   },
   feedback: {
     title: 'Zpětná vazba',
@@ -361,6 +369,10 @@ const en: Dict = {
     disputeOk: 'Dispute sent to support',
     disputeOkText: 'We will reply in the support bot.',
     disputeErr: 'Failed to send the dispute.',
+    receive: 'I received the order',
+    receiveConfirm: 'Confirm that you received the order?',
+    received: '✓ Order received',
+    receiveErr: 'Failed to send the confirmation.',
   },
   feedback: {
     title: 'Feedback',
@@ -490,6 +502,10 @@ const ru: Dict = {
     disputeOk: 'Спор отправлен в поддержку',
     disputeOkText: 'Мы ответим в боте поддержки.',
     disputeErr: 'Не удалось отправить спор.',
+    receive: 'Получил заказ',
+    receiveConfirm: 'Подтвердить, что заказ получен?',
+    received: '✓ Заказ получен',
+    receiveErr: 'Не удалось отправить подтверждение.',
   },
   feedback: {
     title: 'Обратная связь',

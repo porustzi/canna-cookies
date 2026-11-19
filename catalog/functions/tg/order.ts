@@ -209,6 +209,7 @@ async function handleMessage(env: Env, msg: IncomingMessage, token: string): Pro
         `Взято заказов: ${s.taken}`,
         `Выполнено: ${s.done}`,
         `Отклонено: ${s.declined}`,
+        `⭐ Рейтинг: ${s.rating ?? 0}`,
         courier.active ? 'Статус: активен' : 'Статус: отключён',
       ].join('\n'),
     })
@@ -239,7 +240,8 @@ async function handleMessage(env: Env, msg: IncomingMessage, token: string): Pro
     }
     const all = await listCouriers(env)
     const lines = all.map(
-      (c) => `• ${c.name} — взято ${c.stats.taken}, выполнено ${c.stats.done}, отклонено ${c.stats.declined}${c.active ? '' : ' (отключён)'}`,
+      (c) =>
+        `• ${c.name} — взято ${c.stats.taken}, выполнено ${c.stats.done}, ⭐ ${c.stats.rating ?? 0}${c.active ? '' : ' (отключён)'}`,
     )
     await tg(token, 'sendMessage', {
       chat_id: chatId,

@@ -51,6 +51,8 @@ export type OrderInfo = {
   grand: number
   payment?: string
   district?: { name: string; fee: number }
+  assigned: boolean
+  reviewed: boolean
   items: { name: string; weight: string; price: number; qty: number }[]
 }
 
@@ -63,5 +65,13 @@ export function openDispute(orderId: string, text: string): Promise<{ ok: boolea
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ orderId, text }),
+  })
+}
+
+export function confirmReceived(orderId: string): Promise<{ ok: boolean }> {
+  return req('/api/review', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ orderId }),
   })
 }

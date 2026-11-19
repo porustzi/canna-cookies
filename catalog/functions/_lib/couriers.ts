@@ -8,7 +8,7 @@ export type Courier = {
   chatId: string
   active: boolean
   createdAt: string
-  stats: { taken: number; done: number; declined: number }
+  stats: { taken: number; done: number; declined: number; rating?: number }
 }
 
 export type Invite = { code: string; name: string; createdAt: string }
@@ -90,7 +90,7 @@ export async function createCourier(env: Env, name: string, chatId: string | num
     chatId: String(chatId),
     active: true,
     createdAt: new Date().toISOString(),
-    stats: { taken: 0, done: 0, declined: 0 },
+    stats: { taken: 0, done: 0, declined: 0, rating: 0 },
   }
   await saveCourier(env, courier)
   return courier

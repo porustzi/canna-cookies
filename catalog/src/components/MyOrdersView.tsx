@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useApp } from '../context'
-import { getOrder, openDispute, type OrderInfo } from '../api'
+import { confirmReceived, getOrder, openDispute, type OrderInfo } from '../api'
 import { addMyOrder, readMyOrders, type MyOrder } from '../storage'
 
 type Entry = { local: MyOrder; info: OrderInfo | null; loading: boolean; error: boolean }
@@ -23,6 +23,8 @@ export function MyOrdersView() {
   const [disputeBusy, setDisputeBusy] = useState(false)
   const [disputeDone, setDisputeDone] = useState<Record<string, boolean>>({})
   const [disputeErr, setDisputeErr] = useState<string | null>(null)
+  const [receiveBusy, setReceiveBusy] = useState(false)
+  const [receiveErr, setReceiveErr] = useState<string | null>(null)
 
   const loadOne = useCallback(async (id: string) => {
     setEntries((prev) => prev.map((e) => (e.local.id === id ? { ...e, loading: true, error: false } : e)))
@@ -68,6 +70,23 @@ export function MyOrdersView() {
       setDisputeErr(msg === 'rate-limited' ? t.rateLimit : msg === 'not-found' ? t.orders.notFound : t.orders.disputeErr)
     } finally {
       setDisputeBusy(false)
+    }
+  }
+
+  const receiveOrder = async (orderId: string) => {
+    if (!window.confirm(t.orders.receiveConfirm)) return
+    setReceiveBusy(true)
+    setReceiveErr(null)
+    try {
+      await confirmReceived(orderId)
+      setEntries((prev) =>
+        prev.map((e) => (e.local.id === orderId && e.info ? { ...e, info: { ...e.info, reviewed: true } } : e)),
+      )
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : ''
+      setReceiveErr(msg === 'rate-limited' ? t.rateLimit : msg === 'not-assigned' ? t.orders.notFound : t.orders.receiveErr)
+    } finally {
+      setReceiveBusy(false)
     }
   }
 
@@ -151,21 +170,42 @@ export function MyOrdersView() {
               </>
             )}
 
-            {e.info && !disputeDone[e.local.id] && (
+            {e.info && (
               <div className="flex flex-col gap-2">
-                {disputeFor !== e.local.id ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDisputeFor(e.local.id)
-                      setDisputeText('')
-                      setDisputeErr(null)
-                    }}
-                    className="cc-btn-ghost self-start px-4 py-2 text-[11px] hover:border-[rgba(255,90,90,0.5)] hover:text-[#FF9D9D]"
-                  >
-                    ⚔️ {t.orders.dispute}
-                  </button>
-                ) : (
+                <div className="flex flex-wrap gap-2">
+                  {e.info.assigned && !e.info.reviewed && (
+                    <button
+                      type="button"
+                      onClick={() => void receiveOrder(e.local.id)}
+                      disabled={receiveBusy}
+                      className="cc-btn-primary px-4 py-2 text-[11px] disabled:opacity-50"
+                    >
+                      {receiveBusy ? '…' : `⭐ ${t.orders.receive}`}
+                    </button>
+                  )}
+                  {e.info.reviewed && (
+                    <span className="inline-flex items-center rounded-full border border-aqua/50 bg-aqua/10 px-4 py-2 font-display text-[11px] uppercase tracking-[0.14em] text-aqua">
+                      {t.orders.received}
+                    </span>
+                  )}
+                  {!disputeDone[e.local.id] && disputeFor !== e.local.id && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDisputeFor(e.local.id)
+                        setDisputeText('')
+                        setDisputeErr(null)
+                      }}
+                      className="cc-btn-ghost px-4 py-2 text-[11px] hover:border-[rgba(255,90,90,0.5)] hover:text-[#FF9D9D]"
+                    >
+                      ⚔️ {t.orders.dispute}
+                    </button>
+                  )}
+                </div>
+
+                {receiveErr && <p className="text-[13px] text-[#FF9D9D]">{receiveErr}</p>}
+
+                {disputeFor === e.local.id && (
                   <div className="flex flex-col gap-2">
                     <textarea
                       value={disputeText}

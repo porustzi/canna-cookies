@@ -169,6 +169,7 @@ await page.waitForSelector('text=Мои заказы', { timeout: 5000 })
 ok(true, 'my orders tab rendered')
 await page.waitForSelector(`text=${orderId.trim()}`, { timeout: 5000 })
 ok(true, 'order from this device listed')
+ok((await page.locator('button:has-text("Получил заказ")').count()) === 0, 'receive button hidden until courier assigned')
 ok((await overflow()) === 0, 'no overflow on my orders', String(await overflow()))
 await page.screenshot({ path: `${OUT}/c10-orders.png` })
 
