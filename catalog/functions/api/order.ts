@@ -2,6 +2,7 @@ import { DEFAULT_CATALOG, parseLang, pickL, type Product } from '../_lib/default
 import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
 import { clearFailures, isRateLimited, recordFailure } from '../_lib/ratelimit'
 import { sendOrderToTelegram } from '../_lib/telegram'
+import { sendOrderNotification, type OrderRecord } from '../_lib/orderNotify'
 
 type RawLine = { productId?: unknown; weight?: unknown; qty?: unknown }
 
@@ -86,7 +87,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const grand = total + delivery
 
   const id = orderId()
-  const order = {
+  const order: OrderRecord = {
     id,
     createdAt: new Date().toISOString(),
     status: 'new',
@@ -99,6 +100,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     phone: phoneRaw,
     payment,
     comment,
+    lang,
     total,
     delivery,
     grand,
@@ -107,6 +109,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
   await sendOrderToTelegram(env, { id, grand })
+  await sendOrderNotification(env, order)
 
   return json({ ok: true, id, grand })
 }
