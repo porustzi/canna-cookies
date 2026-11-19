@@ -1,9 +1,10 @@
 import { useApp } from '../context'
 import { cartTotals, findProduct, linePrice } from '../cart'
+import { pick } from '../types'
 import { Stepper } from './ui'
 
 export function CartView() {
-  const { t, data, cart, zone, setQty, removeAt, go } = useApp()
+  const { t, data, lang, cart, zone, setQty, removeAt, go } = useApp()
   const district = data.districts.find((d) => d.id === zone.districtId)
   const totals = cartTotals(data, cart, district?.fee ?? 0)
   const underMin = data.settings.minOrder > 0 && totals.subtotal > 0 && totals.subtotal < data.settings.minOrder
@@ -30,7 +31,7 @@ export function CartView() {
           return (
             <div key={`${item.productId}-${item.weightLabel}`} className="cc-card flex items-center gap-3 p-4">
               <div className="min-w-0 flex-1">
-                <p className="truncate font-display text-[14.5px] text-snow">{product?.name ?? '—'}</p>
+                <p className="truncate font-display text-[14.5px] text-snow">{product ? pick(product.name, lang) : '—'}</p>
                 <p className="mt-0.5 font-display text-[11.5px] tracking-wide text-mist/70">{item.weightLabel}</p>
               </div>
               <Stepper value={item.qty} onChange={(n) => setQty(i, n)} />
@@ -56,7 +57,7 @@ export function CartView() {
         </div>
         <div className="flex justify-between text-mist">
           <span>
-            {t.cart.delivery} · {district?.name ?? '—'}
+            {t.cart.delivery} · {district ? pick(district.name, lang) : '—'}
           </span>
           <span className="text-snow">{totals.delivery > 0 ? `${totals.delivery} Kč` : '0 Kč'}</span>
         </div>

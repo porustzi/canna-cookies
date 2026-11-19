@@ -1,26 +1,31 @@
 export type Lang = 'cs' | 'en' | 'ru'
 
+export type L = Record<Lang, string>
+
 export type Weight = { label: string; price: number }
+
+export type ProductImage = { mime: string; v: number }
 
 export type Product = {
   id: string
-  name: string
-  desc: string
+  name: L
+  desc: L
   category: string
   weights: Weight[]
   available: boolean
+  image: ProductImage | null
 }
 
-export type Category = { id: string; name: string }
+export type Category = { id: string; name: L }
 
-export type District = { id: string; name: string; fee: number; eta: string }
+export type District = { id: string; name: L; fee: number; eta: L }
 
 export type Settings = {
-  payment: string[]
+  payment: L[]
   minOrder: number
-  hours: string
+  hours: L
   closed: boolean
-  banner: string
+  banner: L
 }
 
 export type FaqItem = { q: string; a: string }
@@ -31,6 +36,15 @@ export type CatalogData = {
   districts: District[]
   settings: Settings
   faq: Record<Lang, FaqItem[]>
+}
+
+export function pick(l: L | null | undefined, lang: Lang): string {
+  if (!l) return ''
+  return l[lang] || l.cs || l.en || l.ru || ''
+}
+
+export function productImageUrl(p: Product): string | null {
+  return p.image ? `/api/img/product/${encodeURIComponent(p.id)}?v=${p.image.v}` : null
 }
 
 export type CartItem = { productId: string; weightLabel: string; qty: number }
@@ -48,4 +62,5 @@ export type OrderPayload = {
   payment: string
   comment: string
   website: string
+  lang: Lang
 }

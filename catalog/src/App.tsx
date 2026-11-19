@@ -149,7 +149,7 @@ export default function App() {
   }
 
   if (!zone) {
-    return <DistrictGate t={t} data={data} zone={null} onSave={saveZone} />
+    return <DistrictGate t={t} data={data} lang={lang} zone={null} onSave={saveZone} />
   }
 
   const ctx: Ctx = {
@@ -193,7 +193,7 @@ export default function App() {
         <BottomNav />
         <ProductSheet />
         {zoneGate && (
-          <DistrictGate t={t} data={data} zone={zone} onSave={saveZone} onClose={() => setZoneGate(false)} />
+          <DistrictGate t={t} data={data} lang={lang} zone={zone} onSave={saveZone} onClose={() => setZoneGate(false)} />
         )}
       </div>
     </AppCtx.Provider>

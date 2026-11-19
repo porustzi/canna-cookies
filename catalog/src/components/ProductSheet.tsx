@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useApp } from '../context'
 import { findProduct } from '../cart'
+import { pick, productImageUrl } from '../types'
 import { ProductVisual, Sheet, Stepper } from './ui'
 
 function Body({ productId }: { productId: string }) {
-  const { t, data, addToCart, openProduct } = useApp()
+  const { t, data, lang, addToCart, openProduct } = useApp()
   const product = findProduct(data, productId)
   const [selected, setSelected] = useState(product?.weights[0]?.label ?? '')
   const [qty, setQty] = useState(1)
@@ -14,6 +15,7 @@ function Body({ productId }: { productId: string }) {
 
   const weight = product.weights.find((w) => w.label === selected) ?? product.weights[0] ?? null
   const line = weight ? weight.price * qty : 0
+  const name = pick(product.name, lang)
 
   const add = () => {
     if (!weight) return
@@ -25,7 +27,7 @@ function Body({ productId }: { productId: string }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="relative -mx-1 overflow-hidden rounded-2xl">
-        <ProductVisual name={product.name} className="aspect-4/3 w-full" />
+        <ProductVisual name={name} src={productImageUrl(product)} className="aspect-4/3 w-full" />
         {!product.available && (
           <span className="absolute inset-0 grid place-items-center bg-ink/70 font-display text-[12px] uppercase tracking-[0.2em] text-mist">
             {t.catalog.soldOut}
@@ -34,8 +36,8 @@ function Body({ productId }: { productId: string }) {
       </div>
 
       <div>
-        <h2 className="text-[clamp(1.2rem,5vw,1.5rem)]">{product.name}</h2>
-        {product.desc && <p className="mt-2 text-[14px] leading-relaxed text-mist">{product.desc}</p>}
+        <h2 className="text-[clamp(1.2rem,5vw,1.5rem)]">{name}</h2>
+        {pick(product.desc, lang) && <p className="mt-2 text-[14px] leading-relaxed text-mist">{pick(product.desc, lang)}</p>}
       </div>
 
       {product.weights.length > 0 && (

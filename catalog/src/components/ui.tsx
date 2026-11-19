@@ -76,15 +76,19 @@ export function Stepper({ value, onChange, min = 1, max = 20 }: { value: number;
   )
 }
 
-export function ProductVisual({ name, className = '' }: { name: string; className?: string }) {
+export function ProductVisual({ name, src, className = '' }: { name: string; src?: string | null; className?: string }) {
   return (
     <div
       className={`relative grid place-items-center overflow-hidden bg-gradient-to-br from-[#12222b] via-[#0d1519] to-[#0a0d10] ${className}`}
       aria-hidden="true"
     >
-      <span className="font-display text-[clamp(2rem,8vw,3rem)] font-bold tracking-tighter text-aqua/25 select-none">
-        {name.slice(0, 2).toUpperCase()}
-      </span>
+      {src ? (
+        <img src={src} alt="" className="h-full w-full object-cover" loading="lazy" />
+      ) : (
+        <span className="font-display text-[clamp(2rem,8vw,3rem)] font-bold tracking-tighter text-aqua/25 select-none">
+          {name.slice(0, 2).toUpperCase()}
+        </span>
+      )}
       <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_60%_at_70%_20%,rgba(0,200,255,0.12),transparent_65%)]" />
     </div>
   )

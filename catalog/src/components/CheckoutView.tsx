@@ -3,16 +3,18 @@ import { useApp } from '../context'
 import { cartTotals, linePrice } from '../cart'
 import { submitOrder } from '../api'
 import { writeLastOrder } from '../storage'
+import { pick } from '../types'
 import type { OrderLine } from '../types'
 
 export function CheckoutView() {
-  const { t, data, cart, zone, saveZone, go, clearCart } = useApp()
+  const { t, data, lang, cart, zone, saveZone, go, clearCart } = useApp()
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [districtId, setDistrictId] = useState(zone.districtId)
   const [address, setAddress] = useState(zone.address)
-  const [payment, setPayment] = useState(data.settings.payment[0] ?? '')
+  const paymentOptions = data.settings.payment
+  const [paymentIdx, setPaymentIdx] = useState<number | null>(paymentOptions.length > 0 ? 0 : null)
   const [comment, setComment] = useState('')
   const [website, setWebsite] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -20,14 +22,15 @@ export function CheckoutView() {
 
   const district = data.districts.find((d) => d.id === districtId)
   const totals = cartTotals(data, cart, district?.fee ?? 0)
-  const paymentOptions = data.settings.payment
 
   const lines: OrderLine[] = cart.flatMap((item) => {
     const product = data.products.find((p) => p.id === item.productId)
     if (!product) return []
     const price = linePrice(data, item)
     if (price === null) return []
-    return [{ productId: product.id, name: product.name, weight: item.weightLabel, price: price / item.qty, qty: item.qty }]
+    return [
+      { productId: product.id, name: pick(product.name, lang), weight: item.weightLabel, price: price / item.qty, qty: item.qty },
+    ]
   })
 
   const submit = async () => {
@@ -36,7 +39,7 @@ export function CheckoutView() {
       setError(t.required)
       return
     }
-    if (paymentOptions.length > 0 && !payment) {
+    if (paymentOptions.length > 0 && paymentIdx === null) {
       setError(t.required)
       return
     }
@@ -48,9 +51,10 @@ export function CheckoutView() {
         address: address.trim(),
         name: name.trim(),
         phone: phone.trim(),
-        payment,
+        payment: paymentIdx !== null ? pick(paymentOptions[paymentIdx], lang) : '',
         comment: comment.trim(),
         website,
+        lang,
       })
       saveZone({ districtId, address: address.trim() })
       clearCart()
@@ -131,7 +135,7 @@ export function CheckoutView() {
           >
             {data.districts.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {pick(d.name, lang)}
                 {d.fee > 0 ? ` · ${d.fee} Kč` : ''}
               </option>
             ))}
@@ -152,25 +156,25 @@ export function CheckoutView() {
           <div>
             <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.checkout.payment}</span>
             <div className="mt-2 flex flex-col gap-2">
-              {paymentOptions.map((option) => (
+              {paymentOptions.map((option, idx) => (
                 <button
-                  key={option}
+                  key={idx}
                   type="button"
-                  onClick={() => setPayment(option)}
+                  onClick={() => setPaymentIdx(idx)}
                   className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-[14.5px] ${
-                    payment === option
+                    paymentIdx === idx
                       ? 'border-aqua bg-aqua/[0.08] text-snow'
                       : 'border-white/12 bg-white/[0.03] text-mist hover:border-aqua/40'
                   }`}
                 >
                   <span
                     className={`grid h-4.5 w-4.5 shrink-0 place-items-center rounded-full border-2 ${
-                      payment === option ? 'border-aqua bg-aqua' : 'border-white/25'
+                      paymentIdx === idx ? 'border-aqua bg-aqua' : 'border-white/25'
                     }`}
                   >
-                    {payment === option && <span className="h-1.5 w-1.5 rounded-full bg-ink" />}
+                    {paymentIdx === idx && <span className="h-1.5 w-1.5 rounded-full bg-ink" />}
                   </span>
-                  {option}
+                  {pick(option, lang)}
                 </button>
               ))}
             </div>

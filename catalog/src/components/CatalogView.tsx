@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { useApp } from '../context'
+import { pick, productImageUrl } from '../types'
 import { ProductVisual } from './ui'
 
 export function CatalogView() {
-  const { t, data, openProduct } = useApp()
+  const { t, data, lang, openProduct } = useApp()
   const [categoryId, setCategoryId] = useState('all')
 
   const products = categoryId === 'all' ? data.products : data.products.filter((p) => p.category === categoryId)
 
   return (
     <div className="flex flex-col gap-4">
-      {data.settings.banner && (
+      {pick(data.settings.banner, lang) && (
         <div className="rounded-xl border border-aqua/25 bg-aqua/[0.07] px-4 py-3 text-[13.5px] leading-relaxed text-teal">
-          {data.settings.banner}
+          {pick(data.settings.banner, lang)}
         </div>
       )}
 
@@ -26,15 +27,18 @@ export function CatalogView() {
         {t.demoNotice}
       </div>
 
-      {data.settings.hours && (
+      {pick(data.settings.hours, lang) && (
         <p className="font-display text-[11px] uppercase tracking-[0.18em] text-mist/60">
-          {t.hoursLabel}: <span className="text-mist">{data.settings.hours}</span>
+          {t.hoursLabel}: <span className="text-mist">{pick(data.settings.hours, lang)}</span>
         </p>
       )}
 
       {data.categories.length > 1 && (
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-          {[{ id: 'all', name: t.catalog.all }, ...data.categories].map((c) => (
+          {[
+            { id: 'all', label: t.catalog.all },
+            ...data.categories.map((c) => ({ id: c.id, label: pick(c.name, lang) })),
+          ].map((c) => (
             <button
               key={c.id}
               type="button"
@@ -45,7 +49,7 @@ export function CatalogView() {
                   : 'border-white/12 bg-white/[0.04] text-mist hover:border-aqua/40 hover:text-snow'
               }`}
             >
-              {c.name}
+              {c.label}
             </button>
           ))}
         </div>
@@ -57,6 +61,7 @@ export function CatalogView() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {products.map((product) => {
             const minPrice = product.weights.length > 0 ? Math.min(...product.weights.map((w) => w.price)) : 0
+            const name = pick(product.name, lang)
             return (
               <button
                 key={product.id}
@@ -65,7 +70,7 @@ export function CatalogView() {
                 className="cc-card group overflow-hidden p-0 text-left"
               >
                 <div className="relative">
-                  <ProductVisual name={product.name} className="aspect-4/3 w-full" />
+                  <ProductVisual name={name} src={productImageUrl(product)} className="aspect-4/3 w-full" />
                   {!product.available && (
                     <span className="absolute inset-0 grid place-items-center bg-ink/70 font-display text-[11px] uppercase tracking-[0.2em] text-mist">
                       {t.catalog.soldOut}
@@ -73,7 +78,7 @@ export function CatalogView() {
                   )}
                 </div>
                 <div className="p-3.5">
-                  <p className="line-clamp-2 font-display text-[14px] leading-snug text-snow">{product.name}</p>
+                  <p className="line-clamp-2 font-display text-[14px] leading-snug text-snow">{name}</p>
                   <p className="mt-1.5 font-display text-[13px] text-aqua">
                     {t.catalog.from} {minPrice} Kč
                   </p>

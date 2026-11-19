@@ -1,4 +1,4 @@
-import { DEFAULT_CATALOG, type Product } from '../_lib/defaults'
+import { DEFAULT_CATALOG, parseLang, pickL, type Product } from '../_lib/defaults'
 import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
 import { clearFailures, isRateLimited, recordFailure } from '../_lib/ratelimit'
 import { sendOrderToTelegram } from '../_lib/telegram'
@@ -14,6 +14,7 @@ type RawOrder = {
   payment?: unknown
   comment?: unknown
   website?: unknown
+  lang?: unknown
 }
 
 const TTL = 7776000 // 90 дней
@@ -51,6 +52,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const districtId = typeof body.districtId === 'string' ? body.districtId.slice(0, 60) : ''
   const payment = typeof body.payment === 'string' ? body.payment.slice(0, 100) : ''
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
+  const lang = parseLang(body.lang) ?? 'cs'
 
   if (!name || name.length < 2) return fail()
   if (!phoneRaw || phoneRaw.replace(/\D/g, '').length < 6) return fail()
@@ -75,7 +77,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     const weight = product.weights.find((w) => w.label === weightLabel)
     if (!weight) return fail()
 
-    lines.push({ productId, name: product.name, weight: weightLabel, price: weight.price, qty })
+    lines.push({ productId, name: pickL(product.name, lang), weight: weightLabel, price: weight.price, qty })
     total += weight.price * qty
   }
 
@@ -90,7 +92,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     status: 'new',
     items: lines,
     district: district
-      ? { id: district.id, name: district.name, fee: district.fee }
+      ? { id: district.id, name: pickL(district.name, lang), fee: district.fee }
       : { id: districtId, name: districtId || '—', fee: 0 },
     address,
     name,

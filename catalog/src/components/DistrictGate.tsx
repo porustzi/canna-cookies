@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import type { Dict } from '../i18n'
-import type { CatalogData, Zone } from '../types'
+import { pick } from '../types'
+import type { CatalogData, Lang, Zone } from '../types'
 import { Sheet } from './ui'
 
 function Form({
   t,
   data,
+  lang,
   zone,
   onSave,
 }: {
   t: Dict
   data: CatalogData
+  lang: Lang
   zone: Zone | null
   onSave: (zone: Zone) => void
 }) {
@@ -44,7 +47,7 @@ function Form({
           <option value="">{t.district.pick}</option>
           {data.districts.map((d) => (
             <option key={d.id} value={d.id}>
-              {d.name}
+              {pick(d.name, lang)}
               {d.fee > 0 ? ` · ${d.fee} Kč` : ''}
             </option>
           ))}
@@ -73,12 +76,14 @@ function Form({
 export function DistrictGate({
   t,
   data,
+  lang,
   zone,
   onSave,
   onClose,
 }: {
   t: Dict
   data: CatalogData
+  lang: Lang
   zone: Zone | null
   onSave: (zone: Zone) => void
   onClose?: () => void
@@ -86,7 +91,7 @@ export function DistrictGate({
   if (onClose) {
     return (
       <Sheet open onClose={onClose}>
-        <Form t={t} data={data} zone={zone} onSave={onSave} />
+        <Form t={t} data={data} lang={lang} zone={zone} onSave={onSave} />
       </Sheet>
     )
   }
@@ -99,7 +104,7 @@ export function DistrictGate({
       />
       <div className="cc-card relative w-full max-w-md p-7">
         <img src="/cc.png" alt="" className="mb-4 h-10 w-10" />
-        <Form t={t} data={data} zone={zone} onSave={onSave} />
+        <Form t={t} data={data} lang={lang} zone={zone} onSave={onSave} />
       </div>
     </div>
   )

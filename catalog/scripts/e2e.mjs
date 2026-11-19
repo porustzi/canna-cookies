@@ -72,7 +72,7 @@ await page.click('button:has-text("Сохранить и продолжить")'
 // catalog
 await page.waitForSelector('text=Демо-позиции', { timeout: 8000 })
 ok(true, 'catalog rendered after gates')
-ok((await page.locator('button:has-text("Ukázkový produkt 1")').count()) > 0, 'product card visible')
+ok((await page.locator('button:has-text("Тестовый товар 1")').count()) > 0, 'product card visible')
 ok((await overflow()) === 0, 'no horizontal overflow on catalog', String(await overflow()))
 await page.screenshot({ path: `${OUT}/c3-catalog.png` })
 
@@ -84,7 +84,7 @@ await page.click('button:has-text("RU")')
 await page.waitForTimeout(300)
 
 // product sheet
-await page.click('button:has-text("Ukázkový produkt 1")')
+await page.click('button:has-text("Тестовый товар 1")')
 await page.waitForSelector('[role="dialog"]', { timeout: 5000 })
 ok(true, 'product sheet opened')
 await page.screenshot({ path: `${OUT}/c4-product.png` })
@@ -96,7 +96,7 @@ ok(true, 'sheet closed after add')
 // cart
 await page.click('nav button:has-text("Корзина")')
 try {
-  await page.waitForSelector('text=Ukázkový produkt 1', { timeout: 5000 })
+  await page.waitForSelector('text=Тестовый товар 1', { timeout: 5000 })
 } catch (e) {
   console.log('CART DEBUG hash=', await page.evaluate(() => location.hash))
   console.log('CART DEBUG cart=', await page.evaluate(() => localStorage.getItem('cc_app_cart')))
@@ -143,7 +143,7 @@ await page.waitForSelector('text=Спасибо за сообщение!', { tim
 ok(true, 'feedback submitted')
 
 // zone chip opens gate
-await page.click('header button:has-text("Zóna A")')
+await page.click('header button:has-text("Зона A")')
 await page.waitForSelector('text=Куда доставляем?', { timeout: 5000 })
 ok(true, 'zone gate reopens from header')
 await page.keyboard.press('Escape')

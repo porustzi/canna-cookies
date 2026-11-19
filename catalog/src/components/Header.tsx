@@ -1,4 +1,5 @@
 import { useApp } from '../context'
+import { pick } from '../types'
 import type { Lang } from '../types'
 
 const LANGS: { id: Lang; label: string }[] = [
@@ -28,7 +29,7 @@ export function Header() {
             className="max-w-[130px] truncate rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 font-display text-[10.5px] uppercase tracking-[0.14em] text-mist hover:border-aqua/40 hover:text-snow"
             title={t.district.change}
           >
-            {district ? district.name : t.district.change}
+            {district ? pick(district.name, lang) : t.district.change}
           </button>
 
           <div className="flex items-center rounded-full border border-white/12 bg-white/[0.04] p-0.5">
