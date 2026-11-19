@@ -14,6 +14,7 @@ export type Courier = {
 export type Invite = { code: string; name: string; createdAt: string }
 
 const ORDER_TTL = 7776000 // 90 дней, как у заказа
+const REMIND_MAX = 12 // не больше 12 напоминаний на заказ (~1 час каждые 5 минут)
 
 function store(env: Env): KvNamespace | null {
   return env.CATALOG ?? null
@@ -178,7 +179,7 @@ export async function broadcastNewOrder(env: Env, order: OrderRecord): Promise<v
 
 /**
  * Напоминание по заказу: тем курьерам, кто ещё не отреагировал.
- * Если отреактировали все (или курьеров нет) — один раз оповещаем админа.
+ * Максимум REMIND_MAX напоминаний (~1 час), затем один раз — админу и тишина.
  */
 export async function remindOrder(env: Env, order: OrderRecord): Promise<'reminded' | 'admin' | 'skip'> {
   const token = env.TELEGRAM_ORDER_TOKEN
@@ -187,8 +188,9 @@ export async function remindOrder(env: Env, order: OrderRecord): Promise<'remind
   const couriers = (await listCouriers(env)).filter((c) => c.active)
   const nonReactors = couriers.filter((c) => !order.reactions?.[c.id])
   const text = formatOrderCard(order)
+  const maxed = (order.reminders ?? 0) >= REMIND_MAX
 
-  if (nonReactors.length > 0) {
+  if (nonReactors.length > 0 && !maxed) {
     order.msgIds = order.msgIds ?? {}
     for (const courier of nonReactors) {
       const res = await tg(token, 'sendMessage', {
@@ -199,6 +201,7 @@ export async function remindOrder(env: Env, order: OrderRecord): Promise<'remind
       const messageId = (res?.result as { message_id?: number } | undefined)?.message_id
       if (messageId) order.msgIds[courier.id] = [...(order.msgIds[courier.id] ?? []), messageId].slice(-10)
     }
+    order.reminders = (order.reminders ?? 0) + 1
     order.lastReminderAt = Math.floor(Date.now() / 1000)
     await putJson(env, `order:${order.id}`, order, ORDER_TTL)
     return 'reminded'
@@ -209,7 +212,7 @@ export async function remindOrder(env: Env, order: OrderRecord): Promise<'remind
     if (admin) {
       await tg(token, 'sendMessage', {
         chat_id: admin,
-        text: `⏳ Заказ ${order.id} никто не взял (все курьеры отреагировали или курьеров нет). Требуется решение вручную.\n\n${text}`,
+        text: `⏳ Заказ ${order.id} никто не взял (${maxed ? 'напоминания исчерпаны' : 'все курьеры отреагировали или курьеров нет'}). Требуется решение вручную.\n\n${text}`,
       })
     }
     order.adminAlerted = true

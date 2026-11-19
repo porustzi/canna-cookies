@@ -22,6 +22,7 @@ export type OrderRecord = {
   lastReminderAt?: number
   adminAlerted?: boolean
   reviewed?: boolean
+  reminders?: number
 }
 
 const LANGS: Record<string, string> = { ru: 'русский', cs: 'чешский', en: 'английский' }
