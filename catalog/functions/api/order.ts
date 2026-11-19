@@ -1,6 +1,7 @@
 import { DEFAULT_CATALOG, parseLang, pickL, type Product } from '../_lib/defaults'
 import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
-import { clearFailures, isRateLimited, recordFailure } from '../_lib/ratelimit'
+import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFailure } from '../_lib/ratelimit'
+import { isGarbage } from '../_lib/garbage'
 import { sendOrderToTelegram } from '../_lib/telegram'
 import { sendOrderNotification, type OrderRecord } from '../_lib/orderNotify'
 
@@ -55,6 +56,11 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
   const lang = parseLang(body.lang) ?? 'cs'
 
+  // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
+  if (isGarbage(name, comment)) {
+    return json({ ok: true, id: '—', grand: 0 })
+  }
+
   if (!name || name.length < 2) return fail()
   if (!phoneRaw || phoneRaw.replace(/\D/g, '').length < 6) return fail()
   if (!address || address.length < 3) return fail()
@@ -80,6 +86,12 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
     lines.push({ productId, name: pickL(product.name, lang), weight: weightLabel, price: weight.price, qty })
     total += weight.price * qty
+  }
+
+  // 1 заказ в час с устройства — только после успешной валидации
+  const cool = await cooldownRemaining(env, 'order', ip)
+  if (cool > 0) {
+    return json({ error: 'rate-limited' }, 429, { 'retry-after': String(cool) })
   }
 
   const district = districts.find((d) => d.id === districtId)
@@ -108,6 +120,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
+  await markCooldown(env, 'order', ip, 3600)
   await sendOrderToTelegram(env, { id, grand })
   await sendOrderNotification(env, order)
 

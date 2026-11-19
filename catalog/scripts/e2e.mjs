@@ -19,8 +19,15 @@ function ok(cond, name, extra = '') {
 const fs = await import('node:fs')
 fs.mkdirSync(OUT, { recursive: true })
 
+// каждый прогон — свой «устройство» (IP), чтобы кулдаун 1/час не ломал повторные прогоны
+const FAKE_IP = `10.${Math.floor(Math.random() * 200) + 20}.${Math.floor(Math.random() * 250) + 1}.${Math.floor(Math.random() * 250) + 1}`
+
 async function http(path, opts = {}) {
-  const res = await fetch(BASE + path, { redirect: 'manual', ...opts })
+  const res = await fetch(BASE + path, {
+    redirect: 'manual',
+    ...opts,
+    headers: { 'cf-connecting-ip': FAKE_IP, ...(opts.headers ?? {}) },
+  })
   let text = ''
   try {
     text = await res.text()
@@ -39,6 +46,7 @@ const page = await browser.newPage({
   isMobile: true,
   hasTouch: true,
 })
+await page.setExtraHTTPHeaders({ 'cf-connecting-ip': FAKE_IP })
 await page.addInitScript(() => {
   try {
     localStorage.setItem('cc_app_lang', 'ru')
@@ -111,7 +119,7 @@ await page.screenshot({ path: `${OUT}/c5-cart.png` })
 // checkout
 await page.click('button:has-text("К заказу")')
 await page.waitForSelector('text=Отправить заказ', { timeout: 5000 })
-await page.fill('input[placeholder="Как к вам обращаться"]', 'Тест Тестов')
+await page.fill('input[placeholder="Как к вам обращаться"]', 'Jan Novak')
 await page.fill('input[placeholder="+420 …"]', '+420111222333')
 ok((await page.locator('textarea').count()) > 0, 'comment field present')
 await page.screenshot({ path: `${OUT}/c6-checkout.png` })
@@ -135,8 +143,8 @@ await page.screenshot({ path: `${OUT}/c8-faq.png` })
 // feedback
 await page.click('nav button:has-text("Контакт")')
 await page.waitForSelector('text=Обратная связь', { timeout: 5000 })
-await page.fill('input[placeholder="Ваше имя"]', 'Тест Тестов')
-await page.fill('textarea[placeholder="Напишите, что произошло…"]', 'Тестовое сообщение из e2e')
+await page.fill('input[placeholder="Ваше имя"]', 'Anna')
+await page.fill('textarea[placeholder="Напишите, что произошло…"]', 'Dobry den, zajima me doprava do Prahy 5.')
 await page.screenshot({ path: `${OUT}/c9-feedback.png` })
 await page.click('button:has-text("Отправить")')
 await page.waitForSelector('text=Спасибо за сообщение!', { timeout: 5000 })
@@ -182,6 +190,26 @@ ok(r.status === 200 && orderBody?.id === '—', 'honeypot order silently ignored
 r = await http('/api/order', {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({
+    items: [],
+    name: 'тест 123',
+    phone: '+420000000000',
+    address: 'x',
+    comment: 'test',
+    website: '',
+  }),
+})
+let garbageBody = null
+try {
+  garbageBody = JSON.parse(r.text)
+} catch {
+  /* ignore */
+}
+ok(r.status === 200 && garbageBody?.id === '—', 'garbage order silently ignored', r.text)
+
+r = await http('/api/order', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
   body: JSON.stringify({ items: [], website: '' }),
 })
 ok(r.status === 400, 'invalid order -> 400', `got ${r.status}`)
@@ -189,9 +217,17 @@ ok(r.status === 400, 'invalid order -> 400', `got ${r.status}`)
 r = await http('/api/feedback', {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ type: 'question', name: 'API Test', text: 'api feedback test', website: '' }),
+  body: JSON.stringify({ type: 'question', name: 'Anna', text: 'Dobry den, zajima me doprava do Prahy 5.', website: '' }),
 })
-ok(r.status === 200, 'feedback api works', `got ${r.status}`)
+// 200 — первый заход; 429 — кулдаун 1/час с этого же IP после прошлого прогона
+ok(r.status === 200 || r.status === 429, 'feedback api responds', `got ${r.status}`)
+
+r = await http('/api/feedback', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ type: 'question', name: 'тест123', text: 'test test', website: '' }),
+})
+ok(r.status === 200, 'garbage feedback silently ignored', `got ${r.status}`)
 
 if (SKIP_RL) {
   console.log('--- rate limit skipped (SKIP_RATE_LIMIT=1) ---')

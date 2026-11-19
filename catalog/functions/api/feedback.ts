@@ -1,5 +1,6 @@
 import { clientIp, json, putJson, readBody, str, type Env } from '../_lib/kv'
-import { clearFailures, isRateLimited, recordFailure } from '../_lib/ratelimit'
+import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFailure } from '../_lib/ratelimit'
+import { isGarbage } from '../_lib/garbage'
 import { sendFeedbackToTelegram } from '../_lib/telegram'
 
 type RawFeedback = {
@@ -38,9 +39,20 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const text = str(body.text, 3000)
   const contact = typeof body.contact === 'string' ? body.contact.slice(0, 120) : ''
 
+  // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
+  if (isGarbage(name, text)) {
+    return json({ ok: true })
+  }
+
   if (!type || !name || name.length < 2 || !text || text.length < 5) {
     await recordFailure(env, 'fb', ip)
     return json({ error: 'bad-payload' }, 400)
+  }
+
+  // 1 обращение в час с устройства — только после успешной валидации
+  const cool = await cooldownRemaining(env, 'fb', ip)
+  if (cool > 0) {
+    return json({ error: 'rate-limited' }, 429, { 'retry-after': String(cool) })
   }
 
   const id = feedbackId()
@@ -55,6 +67,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
   await putJson(env, `fb:${id}`, feedback, TTL)
   await clearFailures(env, 'fb', ip)
+  await markCooldown(env, 'fb', ip, 3600)
   await sendFeedbackToTelegram(env, { id, type, name, contact, text })
 
   return json({ ok: true })

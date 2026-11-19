@@ -85,3 +85,58 @@ export async function clearFailures(env: Env, bucket: string, ip: string): Promi
     /* KV unavailable */
   }
 }
+
+// ---------- Success cooldown: не чаще N секунд между успешными заявками ----------
+
+const COOL_PREFIX = 'cool:'
+const coolMemory = new Map<string, number>() // key -> exp (epoch sec)
+
+function coolKey(bucket: string, ip: string): string {
+  return `${COOL_PREFIX}${bucket}:${ip}`
+}
+
+function coolMemRead(bucket: string, ip: string): number {
+  const exp = coolMemory.get(coolKey(bucket, ip))
+  if (!exp) return 0
+  if (exp * 1000 < Date.now()) {
+    coolMemory.delete(coolKey(bucket, ip))
+    return 0
+  }
+  return exp
+}
+
+/** Сколько секунд осталось до конца кулдауна (0 — кулдауна нет). */
+export async function cooldownRemaining(env: Env, bucket: string, ip: string): Promise<number> {
+  let exp = coolMemRead(bucket, ip)
+  if (!exp) {
+    try {
+      const store = env.CATALOG
+      const raw = store ? await store.get(coolKey(bucket, ip)) : null
+      if (raw) {
+        const parsed = Number(JSON.parse(raw))
+        if (Number.isFinite(parsed) && parsed * 1000 > Date.now()) {
+          exp = parsed
+          coolMemory.set(coolKey(bucket, ip), parsed)
+        }
+      }
+    } catch {
+      /* KV unavailable — memory only */
+    }
+  }
+  if (!exp) return 0
+  return Math.max(1, Math.ceil(exp - Date.now() / 1000))
+}
+
+export async function markCooldown(env: Env, bucket: string, ip: string, seconds: number): Promise<void> {
+  const exp = Math.floor(Date.now() / 1000) + seconds
+  coolMemory.set(coolKey(bucket, ip), exp)
+  if (coolMemory.size > 5000) {
+    const now = Date.now()
+    for (const [k, v] of coolMemory) if (v * 1000 < now) coolMemory.delete(k)
+  }
+  try {
+    await env.CATALOG?.put(coolKey(bucket, ip), JSON.stringify(exp), { expirationTtl: seconds })
+  } catch {
+    /* KV unavailable — memory only */
+  }
+}
