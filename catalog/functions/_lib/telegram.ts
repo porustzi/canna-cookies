@@ -1,10 +1,5 @@
 import type { Env } from './kv'
 
-export type OrderPayload = {
-  id: string
-  grand: number
-}
-
 export type FeedbackPayload = {
   id: string
   type: string
@@ -21,13 +16,6 @@ export const FEEDBACK_KEYBOARD = [
   ],
   [{ text: '🗑 Очистить', callback_data: 'fb:clear' }],
 ]
-
-/**
- * Заглушка: отправка заказа курьерам через их бота (отдельный токен, не трогаем).
- */
-export async function sendOrderToTelegram(_env: Env, _order: OrderPayload): Promise<void> {
-  /* TODO(telegram): Bot API sendMessage → чат курьеров */
-}
 
 /**
  * Отправляет обращение с вкладки «Контакт» в Telegram-бота поддержки.

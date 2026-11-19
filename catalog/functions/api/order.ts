@@ -2,8 +2,8 @@ import { DEFAULT_CATALOG, parseLang, pickL, type Product } from '../_lib/default
 import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
 import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFailure } from '../_lib/ratelimit'
 import { isGarbage } from '../_lib/garbage'
-import { sendOrderToTelegram } from '../_lib/telegram'
-import { sendOrderNotification, type OrderRecord } from '../_lib/orderNotify'
+import { broadcastNewOrder } from '../_lib/couriers'
+import type { OrderRecord } from '../_lib/orderNotify'
 
 type RawLine = { productId?: unknown; weight?: unknown; qty?: unknown }
 
@@ -121,8 +121,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
   await markCooldown(env, 'order', ip, 3600)
-  await sendOrderToTelegram(env, { id, grand })
-  await sendOrderNotification(env, order)
+  await broadcastNewOrder(env, order)
 
   return json({ ok: true, id, grand })
 }
