@@ -40,10 +40,11 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const name = str(body.name, 100)
   const text = str(body.text, 3000)
   const phone = typeof body.phone === 'string' ? body.phone.slice(0, 40).trim() : ''
-  const tg = typeof body.tg === 'string' ? body.tg.slice(0, 64).trim().replace(/^@+/, '') : ''
+  const tgRaw = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  const tg = tgRaw ? `@${tgRaw}` : ''
   // старый одиночный контакт поддерживаем как запасной вариант
   const legacyContact = typeof body.contact === 'string' ? body.contact.slice(0, 120).trim() : ''
-  const contact = [phone ? `тел. ${phone}` : '', tg ? `@${tg}` : '', legacyContact].filter(Boolean).join(' · ')
+  const contact = [phone ? `тел. ${phone}` : '', tg, legacyContact].filter(Boolean).join(' · ')
 
   // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
   if (isGarbage(name, text)) {
@@ -53,6 +54,12 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   if (!type || !name || name.length < 2 || !text || text.length < 5) {
     await recordFailure(env, 'fb', ip)
     return json({ error: 'bad-payload' }, 400)
+  }
+
+  // Telegram-username обязателен
+  if (!/^@[A-Za-z0-9_]{3,32}$/.test(tg)) {
+    await recordFailure(env, 'fb', ip)
+    return json({ error: 'tg-required' }, 400)
   }
 
   // с этого устройства уже был заказ — вопрос не принимаем (жалобы можно)

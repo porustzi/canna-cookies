@@ -19,7 +19,6 @@ function ok(cond, name, extra = '') {
 }
 
 const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': SECRET }
-const ip = { 'cf-connecting-ip': `12.${Math.floor(Math.random() * 200) + 20}.9.9` }
 
 async function webhook(payload) {
   const res = await fetch(`${BASE}/tg/order`, { method: 'POST', headers, body: JSON.stringify(payload) })
@@ -37,6 +36,7 @@ async function order(name, comment) {
       address: 'Kuryni 5, Praha',
       name,
       phone: '+420555666777',
+      tg: 'ivan_novak',
       payment: 'Наличные',
       comment,
       lang: 'ru',
@@ -117,6 +117,14 @@ ok(Boolean(takenHit), 'order status -> taken')
 // Petra tries to take too -> already processed (still 200)
 st = await webhook({ callback_query: { id: 'cb2', data: `ord:${id1}:take`, message: { message_id: 11, chat: { id: 555002 } } } })
 ok(st === 200, 'late take handled', String(st))
+
+// client cannot cancel after a courier took the order
+const cancelAfterTake = await fetch(`${BASE}/api/cancel`, {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': `16.${Math.floor(Math.random() * 200) + 20}.8.8` },
+  body: JSON.stringify({ orderId: id1 }),
+})
+ok(cancelAfterTake.status === 409, 'cancel after take ->409 too-late', String(cancelAfterTake.status))
 
 // 7. Ivan marks done
 st = await webhook({ callback_query: { id: 'cb3', data: `ord:${id1}:done`, message: { message_id: 10, chat: { id: 555001 } } } })

@@ -127,6 +127,7 @@ await page.click('button:has-text("К заказу")')
 await page.waitForSelector('text=Отправить заказ', { timeout: 5000 })
 await page.fill('input[placeholder="Как к вам обращаться"]', 'Jan Novak')
 await page.fill('input[placeholder="+420 …"]', '+420111222333')
+await page.fill('input[placeholder="@username (обязательно)"]', 'e2e_client')
 ok((await page.locator('textarea').count()) > 0, 'comment field present')
 await page.screenshot({ path: `${OUT}/c6-checkout.png` })
 await page.click('button:has-text("Отправить заказ")')
@@ -151,7 +152,7 @@ await page.click('nav button:has-text("Контакт")')
 await page.waitForSelector('text=Обратная связь', { timeout: 5000 })
 await page.fill('input[placeholder="Ваше имя"]', 'Anna')
 await page.fill('input[placeholder="+420 … (необязательно)"]', '+420777888999')
-await page.fill('input[placeholder="@username (необязательно)"]', 'anna_tg')
+await page.fill('input[placeholder="@username (обязательно)"]', 'anna_tg')
 await page.fill('textarea[placeholder="Напишите, что произошло…"]', 'Dobry den, zajima me doprava do Prahy 5.')
 await page.screenshot({ path: `${OUT}/c9-feedback.png` })
 // вопрос с устройства, которое уже делало заказ — блок
@@ -251,10 +252,27 @@ r = await http('/api/order', {
 })
 ok(r.status === 400, 'invalid order -> 400', `got ${r.status}`)
 
+// order without telegram username ->400
+r = await http('/api/order', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP2 },
+  body: JSON.stringify({
+    items: [{ productId: 'p1', weight: '3.5 g', qty: 1 }],
+    districtId: 'zona-a',
+    address: 'Testova 1, Praha',
+    name: 'Jan Novak',
+    phone: '+420111222333',
+    payment: 'Cash',
+    lang: 'ru',
+    website: '',
+  }),
+})
+ok(r.status === 400 && r.text.includes('tg-required'), 'order without tg ->400', `got ${r.status} ${r.text.slice(0, 60)}`)
+
 r = await http('/api/feedback', {
   method: 'POST',
   headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP },
-  body: JSON.stringify({ type: 'question', name: 'Anna', text: 'Dobry den, zajima me doprava do Prahy 5.', website: '' }),
+  body: JSON.stringify({ type: 'question', name: 'Anna', tg: 'anna_tg', text: 'Dobry den, zajima me doprava do Prahy 5.', website: '' }),
 })
 ok(r.status === 403 && r.text.includes('already-ordered'), 'question after order -> 403', `got ${r.status} ${r.text.slice(0, 80)}`)
 
@@ -269,9 +287,17 @@ ok(r.status === 200 || r.status === 429, 'complaint after order allowed', `got $
 r = await http('/api/feedback', {
   method: 'POST',
   headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP2 },
-  body: JSON.stringify({ type: 'question', name: 'Petr', text: 'Dobry den, mám dotaz k doprave.', website: '' }),
+  body: JSON.stringify({ type: 'question', name: 'Petr', tg: 'petr_tg', text: 'Dobry den, mám dotaz k doprave.', website: '' }),
 })
 ok(r.status === 200 || r.status === 429, 'question from fresh device allowed', `got ${r.status}`)
+
+// feedback without telegram username ->400
+r = await http('/api/feedback', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP2 },
+  body: JSON.stringify({ type: 'question', name: 'Petr', text: 'Dobry den, mam dotaz bez telegramu.', website: '' }),
+})
+ok(r.status === 400 && r.text.includes('tg-required'), 'feedback without tg ->400', `got ${r.status} ${r.text.slice(0, 60)}`)
 
 r = await http('/api/feedback', {
   method: 'POST',

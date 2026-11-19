@@ -73,5 +73,6 @@ export type OrderPayload = {
   website: string
   lang: Lang
   tgId?: string
+  tg?: string
   promo?: string
 }

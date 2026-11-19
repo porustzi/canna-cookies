@@ -91,6 +91,7 @@ export function OrdersEditor({ state, onSaved }: { state: AdminState; onSaved: (
             <div className="grid gap-1.5 text-[13.5px] text-mist sm:grid-cols-2">
               <p>
                 👤 {o.name} · {o.phone}
+                {o.tg ? ` · ${o.tg}` : ''}
               </p>
               <p>
                 📍 {o.district?.name ?? '—'} · {o.address}

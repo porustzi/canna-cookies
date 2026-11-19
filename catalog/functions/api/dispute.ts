@@ -59,13 +59,14 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   }
 
   const id = feedbackId()
+  const contact = [order.phone ? `тел. ${order.phone}` : '', order.tg].filter(Boolean).join(' · ')
   const feedback = {
     id,
     createdAt: new Date().toISOString(),
     type: 'dispute',
     orderId: order.id,
     name: order.name,
-    contact: order.phone ? `тел. ${order.phone}` : '',
+    contact,
     text,
   }
 
@@ -76,7 +77,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     id,
     type: 'dispute',
     name: order.name,
-    contact: feedback.contact,
+    contact,
     text,
     orderId: order.id,
   })

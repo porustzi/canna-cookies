@@ -12,6 +12,7 @@ export type OrderRecord = {
   payment: string
   comment?: string
   lang?: string
+  tg?: string
   total: number
   delivery: number
   grand: number
@@ -79,6 +80,7 @@ export function formatOrderCard(order: OrderRecord, opts: CardOpts = {}): string
   lines.push(`Зона: ${zone}`)
   lines.push(`Адрес: ${order.address}`)
   lines.push(`Клиент: ${order.name} · ${order.phone}`)
+  if (order.tg) lines.push(`Telegram: ${order.tg}`)
   lines.push(`Сумма: ${order.total} Kč · доставка ${order.delivery} Kč · итого ${order.grand} Kč`)
   if (order.payment) lines.push(`Оплата: ${order.payment}`)
   if (order.comment) lines.push(`Комментарий: ${order.comment}`)

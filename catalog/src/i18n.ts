@@ -7,6 +7,7 @@ export type Dict = {
   close: string
   required: string
   rateLimit: string
+  tgRequired: string
   age: {
     badge: string
     title: string
@@ -79,6 +80,8 @@ export type Dict = {
     promo: string
     promoPh: string
     promoBad: string
+    tg: string
+    tgPh: string
   }
   confirm: {
     title: string
@@ -151,6 +154,7 @@ const cs: Dict = {
   close: 'Zavřít',
   required: 'Vyplňte prosím povinná pole.',
   rateLimit: 'Příliš mnoho pokusů — zkuste to za chvíli.',
+  tgRequired: 'Vyplňte Telegram username (@).',
   age: {
     badge: 'Jen pro dospělé',
     title: 'Je vám 21 let nebo více?',
@@ -223,6 +227,8 @@ const cs: Dict = {
     promo: 'Slevový kód',
     promoPh: 'Zadejte kód',
     promoBad: 'Kód neplatí.',
+    tg: 'Telegram',
+    tgPh: '@username (povinné)',
   },
   confirm: {
     title: 'Objednávka přijata',
@@ -273,7 +279,7 @@ const cs: Dict = {
     phone: 'Telefon',
     phonePh: '+420 … (volitelné)',
     tg: 'Telegram',
-    tgPh: '@username (volitelné)',
+    tgPh: '@username (povinné)',
     text: 'Zpráva',
     textPh: 'Napište, co se stalo…',
     submit: 'Odeslat',
@@ -295,6 +301,7 @@ const en: Dict = {
   close: 'Close',
   required: 'Please fill in the required fields.',
   rateLimit: 'Too many attempts — please try again shortly.',
+  tgRequired: 'Enter your Telegram username (@).',
   age: {
     badge: 'Adults only',
     title: 'Are you 21 or older?',
@@ -367,6 +374,8 @@ const en: Dict = {
     promo: 'Promo code',
     promoPh: 'Enter code',
     promoBad: 'Invalid code.',
+    tg: 'Telegram',
+    tgPh: '@username (required)',
   },
   confirm: {
     title: 'Order received',
@@ -417,7 +426,7 @@ const en: Dict = {
     phone: 'Phone',
     phonePh: '+420 … (optional)',
     tg: 'Telegram',
-    tgPh: '@username (optional)',
+    tgPh: '@username (required)',
     text: 'Message',
     textPh: 'Tell us what happened…',
     submit: 'Send',
@@ -439,6 +448,7 @@ const ru: Dict = {
   close: 'Закрыть',
   required: 'Заполните обязательные поля.',
   rateLimit: 'Слишком много попыток — попробуйте позже.',
+  tgRequired: 'Укажите Telegram-username (@).',
   age: {
     badge: 'Только для взрослых',
     title: 'Вам исполнилось 21 год?',
@@ -511,6 +521,8 @@ const ru: Dict = {
     promo: 'Промокод',
     promoPh: 'Введите код',
     promoBad: 'Код не сработал.',
+    tg: 'Telegram',
+    tgPh: '@username (обязательно)',
   },
   confirm: {
     title: 'Заказ принят',
@@ -561,7 +573,7 @@ const ru: Dict = {
     phone: 'Телефон',
     phonePh: '+420 … (необязательно)',
     tg: 'Telegram',
-    tgPh: '@username (необязательно)',
+    tgPh: '@username (обязательно)',
     text: 'Сообщение',
     textPh: 'Напишите, что произошло…',
     submit: 'Отправить',

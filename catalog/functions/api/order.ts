@@ -19,6 +19,7 @@ type RawOrder = {
   website?: unknown
   lang?: unknown
   tgId?: unknown
+  tg?: unknown
   promo?: unknown
 }
 
@@ -60,6 +61,8 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
   const lang = parseLang(body.lang) ?? 'cs'
   const tgId = typeof body.tgId === 'string' && /^\d{1,20}$/.test(body.tgId) ? body.tgId : undefined
+  const tgRaw = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  const tg = tgRaw ? `@${tgRaw}` : ''
   const promoCode = typeof body.promo === 'string' ? body.promo.trim().slice(0, 30) : ''
 
   // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
@@ -70,6 +73,11 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   if (!name || name.length < 2) return fail()
   if (!phoneRaw || phoneRaw.replace(/\D/g, '').length < 6) return fail()
   if (!address || address.length < 3) return fail()
+  // Telegram-username обязателен
+  if (!/^@[A-Za-z0-9_]{3,32}$/.test(tg)) {
+    await recordFailure(env, 'order', ip)
+    return json({ error: 'tg-required' }, 400)
+  }
 
   const settings = await readJson<Settings>(env, 'catalog:settings', DEFAULT_CATALOG.settings)
 
@@ -144,6 +152,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     payment,
     comment,
     lang,
+    tg,
     tgId,
     discount,
     promo: promoApplied || undefined,

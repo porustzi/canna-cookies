@@ -17,6 +17,7 @@ export function CheckoutView() {
   const [paymentIdx, setPaymentIdx] = useState<number | null>(paymentOptions.length > 0 ? 0 : null)
   const [comment, setComment] = useState('')
   const [promo, setPromo] = useState('')
+  const [tg, setTg] = useState(() => (tgUser?.username ? `@${tgUser.username}` : ''))
   const [website, setWebsite] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -52,6 +53,11 @@ export function CheckoutView() {
       setError(t.required)
       return
     }
+    const tgVal = tg.trim().replace(/^@*/, '@')
+    if (!/^@[A-Za-z0-9_]{3,32}$/.test(tgVal)) {
+      setError(t.tgRequired)
+      return
+    }
     setBusy(true)
     try {
       const res = await submitOrder({
@@ -64,6 +70,7 @@ export function CheckoutView() {
         comment: comment.trim(),
         website,
         lang,
+        tg: tgVal,
         tgId: tgUser?.id ? String(tgUser.id) : undefined,
         promo: promo.trim() || undefined,
       })
@@ -79,6 +86,7 @@ export function CheckoutView() {
         closed: t.closed,
         'min-order': t.cart.minOrder.replace('{n}', String(data.settings.minOrder)),
         'sold-out': t.catalog.soldOut,
+        'tg-required': t.tgRequired,
       }
       setError(map[msg] ?? t.error)
     } finally {
@@ -220,6 +228,17 @@ export function CheckoutView() {
             {promoWrong && <p className="mt-1 text-[12.5px] text-[#FFD28F]">{t.checkout.promoBad}</p>}
           </label>
         )}
+
+        <label className="block">
+          <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.checkout.tg}</span>
+          <input
+            value={tg}
+            onChange={(e) => setTg(e.target.value)}
+            placeholder={t.checkout.tgPh}
+            autoCapitalize="none"
+            className="mt-2 w-full rounded-xl border border-white/12 bg-graphite px-4 py-3.5 text-[15px] text-snow placeholder:text-mist/40 outline-none focus:border-aqua/60"
+          />
+        </label>
 
         <label className="block">
           <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.checkout.comment}</span>

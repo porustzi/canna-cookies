@@ -42,6 +42,7 @@ r = await fetch(`${BASE}/api/order`, {
     address: 'Testova 12, Praha 5',
     name: 'Ivan Novak',
     phone: '+420111222333',
+    tg: 'ivan_novak',
     payment: 'Наличные',
     comment: 'Прогон бота заказов, можно отклонить',
     lang: 'ru',
@@ -64,6 +65,7 @@ if (freshRun) {
       address: 'Testova 12, Praha 5',
       name: 'Ivan Novak',
       phone: '+420111222333',
+      tg: 'ivan_novak',
       payment: 'Наличные',
       comment: '',
       lang: 'ru',
@@ -123,7 +125,7 @@ ok(r.status === 200, 'garbage feedback silently ignored', `got ${r.status}`)
 r = await fetch(`${BASE}/api/feedback`, {
   method: 'POST',
   headers,
-  body: JSON.stringify({ type: 'question', name: 'Anna', text: 'Dobry den, zajima me doprava.', website: '' }),
+  body: JSON.stringify({ type: 'question', name: 'Anna', tg: 'anna_tg', text: 'Dobry den, zajima me doprava.', website: '' }),
 })
 ok(r.status === 403 && (await r.text()).includes('already-ordered'), 'question after order -> 403', `got ${r.status}`)
 
@@ -139,7 +141,7 @@ if (r.status === 200) {
   const r2 = await fetch(`${BASE}/api/feedback`, {
     method: 'POST',
     headers: fbHeaders,
-    body: JSON.stringify({ type: 'complaint', name: 'Anna', text: 'Druha stiznost pro overeni limitu.', website: '' }),
+    body: JSON.stringify({ type: 'complaint', name: 'Anna', tg: 'anna_tg', text: 'Druha stiznost pro overeni limitu.', website: '' }),
   })
   const retry = Number(r2.headers.get('retry-after') || 0)
   ok(r2.status === 429 && retry > 20 && retry <= 60, 'second feedback within minute -> 429', `got ${r2.status} ra=${retry}`)

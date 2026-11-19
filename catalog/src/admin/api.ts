@@ -21,6 +21,7 @@ export type AdminOrder = {
   payment: string
   comment?: string
   lang?: string
+  tg?: string
   total: number
   delivery: number
   discount?: number

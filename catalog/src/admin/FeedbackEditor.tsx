@@ -59,7 +59,7 @@ export function FeedbackEditor({ state, onSaved }: { state: AdminState; onSaved:
             <b className="text-snow">{item.name}</b>
             {item.contact ? ` · ${item.contact}` : ''}
             {item.phone ? ` · ${item.phone}` : ''}
-            {item.tg ? ` · @${item.tg}` : ''}
+            {item.tg ? ` · ${item.tg.startsWith('@') ? item.tg : `@${item.tg}`}` : ''}
           </p>
           <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-snow">{item.text}</p>
 

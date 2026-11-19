@@ -4,7 +4,7 @@ import { submitFeedback } from '../api'
 import { pick } from '../types'
 
 export function FeedbackView() {
-  const { t, go, data, lang } = useApp()
+  const { t, go, data, lang, tgUser } = useApp()
 
   const contacts = data.settings.contacts
   const hasContacts = Boolean(contacts && (contacts.phone || contacts.tg || contacts.address))
@@ -13,7 +13,7 @@ export function FeedbackView() {
   const [type, setType] = useState<'question' | 'complaint'>('question')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [tg, setTg] = useState('')
+  const [tg, setTg] = useState(() => (tgUser?.username ? `@${tgUser.username}` : ''))
   const [text, setText] = useState('')
   const [website, setWebsite] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -26,13 +26,18 @@ export function FeedbackView() {
       setError(t.required)
       return
     }
+    const tgVal = tg.trim().replace(/^@*/, '@')
+    if (!/^@[A-Za-z0-9_]{3,32}$/.test(tgVal)) {
+      setError(t.tgRequired)
+      return
+    }
     setBusy(true)
     try {
       await submitFeedback({
         type,
         name: name.trim(),
         phone: phone.trim(),
-        tg: tg.trim(),
+        tg: tgVal,
         text: text.trim(),
         website,
       })
@@ -40,7 +45,13 @@ export function FeedbackView() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : ''
       setError(
-        msg === 'rate-limited' ? t.rateLimit : msg === 'already-ordered' ? t.feedback.ordered : t.error,
+        msg === 'rate-limited'
+          ? t.rateLimit
+          : msg === 'already-ordered'
+            ? t.feedback.ordered
+            : msg === 'tg-required'
+              ? t.tgRequired
+              : t.error,
       )
     } finally {
       setBusy(false)
