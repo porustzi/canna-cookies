@@ -31,6 +31,9 @@ export function ConfirmView() {
       <button type="button" onClick={() => go('catalog')} className="cc-btn-primary w-full py-3.5 text-[13px]">
         {t.confirm.again}
       </button>
+      <button type="button" onClick={() => go('orders')} className="cc-btn-ghost w-full py-3 text-[11.5px]">
+        {t.nav.orders}
+      </button>
     </div>
   )
 }

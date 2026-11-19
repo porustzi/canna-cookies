@@ -6,6 +6,7 @@ export type FeedbackPayload = {
   name: string
   contact: string
   text: string
+  orderId?: string
 }
 
 export const FEEDBACK_KEYBOARD = [
@@ -14,7 +15,10 @@ export const FEEDBACK_KEYBOARD = [
     { text: '⚠️ Жалобы', callback_data: 'fb:complaint' },
     { text: '📋 Всё', callback_data: 'fb:all' },
   ],
-  [{ text: '🗑 Очистить', callback_data: 'fb:clear' }],
+  [
+    { text: '⚔️ Споры', callback_data: 'fb:dispute' },
+    { text: '🗑 Очистить', callback_data: 'fb:clear' },
+  ],
 ]
 
 /**
@@ -27,14 +31,16 @@ export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload
   const chatId = env.TELEGRAM_FEEDBACK_CHAT_ID
   if (!token || !chatId) return
 
-  const label = feedback.type === 'complaint' ? '⚠️ Жалоба' : '💬 Вопрос'
+  const label =
+    feedback.type === 'complaint' ? '⚠️ Жалоба' : feedback.type === 'dispute' ? '⚔️ Спор' : '💬 Вопрос'
   const lines = [
     `${label} · ${feedback.id}`,
+    feedback.orderId ? `Заказ: ${feedback.orderId}` : null,
     `Имя: ${feedback.name}`,
     `Контакт: ${feedback.contact || '—'}`,
     '',
     feedback.text,
-  ]
+  ].filter((x): x is string => Boolean(x))
 
   const reply_markup = JSON.stringify({ inline_keyboard: FEEDBACK_KEYBOARD })
 

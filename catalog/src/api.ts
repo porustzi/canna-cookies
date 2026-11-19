@@ -41,3 +41,27 @@ export function submitFeedback(payload: {
     body: JSON.stringify(payload),
   })
 }
+
+export type OrderInfo = {
+  id: string
+  status: string
+  createdAt?: string
+  total: number
+  delivery: number
+  grand: number
+  payment?: string
+  district?: { name: string; fee: number }
+  items: { name: string; weight: string; price: number; qty: number }[]
+}
+
+export function getOrder(id: string): Promise<OrderInfo> {
+  return req<{ order: OrderInfo }>(`/api/order/${encodeURIComponent(id)}`).then((r) => r.order)
+}
+
+export function openDispute(orderId: string, text: string): Promise<{ ok: boolean }> {
+  return req('/api/dispute', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ orderId, text }),
+  })
+}

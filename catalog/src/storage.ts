@@ -101,3 +101,25 @@ export function writeLastOrder(order: LastOrder): void {
     /* ignore */
   }
 }
+
+export type MyOrder = { id: string; at: number }
+
+const MY_ORDERS_KEY = 'cc_app_orders'
+
+export function readMyOrders(): MyOrder[] {
+  const raw = lsGet(MY_ORDERS_KEY)
+  if (!raw) return []
+  try {
+    const list = JSON.parse(raw) as MyOrder[]
+    if (!Array.isArray(list)) return []
+    return list.filter((o) => typeof o.id === 'string' && typeof o.at === 'number')
+  } catch {
+    return []
+  }
+}
+
+export function addMyOrder(id: string): void {
+  const list = readMyOrders().filter((o) => o.id !== id)
+  list.unshift({ id, at: Date.now() })
+  lsSet(MY_ORDERS_KEY, JSON.stringify(list.slice(0, 20)))
+}

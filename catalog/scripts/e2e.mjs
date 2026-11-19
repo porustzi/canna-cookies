@@ -163,6 +163,22 @@ await page.click('button:has-text("Отправить")')
 await page.waitForSelector('text=Спасибо за сообщение!', { timeout: 5000 })
 ok(true, 'feedback submitted as complaint')
 
+// my orders tab: history from this device + dispute flow
+await page.click('nav button:has-text("Заказы")')
+await page.waitForSelector('text=Мои заказы', { timeout: 5000 })
+ok(true, 'my orders tab rendered')
+await page.waitForSelector(`text=${orderId.trim()}`, { timeout: 5000 })
+ok(true, 'order from this device listed')
+ok((await overflow()) === 0, 'no overflow on my orders', String(await overflow()))
+await page.screenshot({ path: `${OUT}/c10-orders.png` })
+
+await page.click('button:has-text("Открыть спор")')
+await page.fill('textarea[placeholder="Опишите проблему…"]', 'Kurier neprijel, chci resit objednavku.')
+await page.screenshot({ path: `${OUT}/c11-dispute.png` })
+await page.click('button:has-text("Отправить в поддержку")')
+await page.waitForSelector('text=Спор отправлен в поддержку', { timeout: 5000 })
+ok(true, 'dispute submitted to support bot')
+
 // zone chip opens gate
 await page.click('header button:has-text("Зона A")')
 await page.waitForSelector('text=Куда доставляем?', { timeout: 5000 })

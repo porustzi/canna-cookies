@@ -6,6 +6,7 @@ export function BottomNav() {
   const items = [
     { id: 'catalog', label: t.nav.catalog },
     { id: 'cart', label: t.nav.cart, badge: cartCount },
+    { id: 'orders', label: t.nav.orders },
     { id: 'faq', label: t.nav.faq },
     { id: 'feedback', label: t.nav.feedback },
   ]
@@ -20,7 +21,7 @@ export function BottomNav() {
               key={item.id}
               type="button"
               onClick={() => go(item.id)}
-              className={`relative rounded-full px-3.5 py-2 font-display text-[10.5px] uppercase tracking-[0.14em] transition-colors ${
+              className={`relative rounded-full px-2.5 py-2 font-display text-[10px] uppercase tracking-[0.1em] transition-colors sm:px-3.5 sm:text-[10.5px] sm:tracking-[0.14em] ${
                 active ? 'bg-aqua text-ink' : 'text-mist hover:text-snow'
               }`}
             >

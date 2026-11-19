@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../context'
 import { cartTotals, linePrice } from '../cart'
 import { submitOrder } from '../api'
-import { writeLastOrder } from '../storage'
+import { addMyOrder, writeLastOrder } from '../storage'
 import { pick } from '../types'
 import type { OrderLine } from '../types'
 
@@ -59,6 +59,7 @@ export function CheckoutView() {
       saveZone({ districtId, address: address.trim() })
       clearCart()
       writeLastOrder({ id: res.id, grand: res.grand })
+      if (res.id.startsWith('CC-')) addMyOrder(res.id)
       go('order')
     } catch (e) {
       const msg = e instanceof Error ? e.message : ''

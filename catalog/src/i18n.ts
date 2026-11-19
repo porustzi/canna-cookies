@@ -29,6 +29,7 @@ export type Dict = {
     cart: string
     faq: string
     feedback: string
+    orders: string
   }
   demoNotice: string
   closed: string
@@ -85,6 +86,24 @@ export type Dict = {
     title: string
     empty: string
   }
+  orders: {
+    title: string
+    lead: string
+    empty: string
+    find: string
+    findPh: string
+    findBtn: string
+    notFound: string
+    sNew: string
+    sTaken: string
+    sDone: string
+    dispute: string
+    disputePh: string
+    disputeSend: string
+    disputeOk: string
+    disputeOkText: string
+    disputeErr: string
+  }
   feedback: {
     title: string
     lead: string
@@ -139,6 +158,7 @@ const cs: Dict = {
     cart: 'Košík',
     faq: 'FAQ',
     feedback: 'Kontakt',
+    orders: 'Objednávky',
   },
   demoNotice: 'Ukázkové položky — reálný katalog doplníme.',
   closed: 'Momentálně máme zavřeno — objednávky vyřídíme při dalším otevření.',
@@ -195,6 +215,24 @@ const cs: Dict = {
     title: 'FAQ — nákup a doručení',
     empty: 'FAQ připravujeme.',
   },
+  orders: {
+    title: 'Moje objednávky',
+    lead: 'Objednávky z tohoto zařízení a hledání podle čísla.',
+    empty: 'Zatím žádné objednávky. Najděte podle čísla nebo vytvořte objednávku.',
+    find: 'Najít podle čísla',
+    findPh: 'CC-…',
+    findBtn: 'Najít',
+    notFound: 'Objednávka nenalezena.',
+    sNew: 'přijata',
+    sTaken: 'převzal kurýr',
+    sDone: 'dokončena',
+    dispute: 'Otevřít spor',
+    disputePh: 'Popište problém…',
+    disputeSend: 'Odeslat do podpory',
+    disputeOk: 'Spor odeslán do podpory',
+    disputeOkText: 'Odpovíme v botu podpory.',
+    disputeErr: 'Spor se nepodařilo odeslat.',
+  },
   feedback: {
     title: 'Zpětná vazba',
     lead: 'Máte dotaz nebo stížnost? Napište nám — ozveme se.',
@@ -249,6 +287,7 @@ const en: Dict = {
     cart: 'Cart',
     faq: 'FAQ',
     feedback: 'Contact',
+    orders: 'Orders',
   },
   demoNotice: 'Sample items — the real catalogue is coming.',
   closed: 'We are currently closed — orders placed now are handled at the next opening.',
@@ -305,6 +344,24 @@ const en: Dict = {
     title: 'FAQ — buying & delivery',
     empty: 'FAQ is coming.',
   },
+  orders: {
+    title: 'My orders',
+    lead: 'Orders from this device and lookup by number.',
+    empty: 'No orders yet. Look one up by number or place an order.',
+    find: 'Find by number',
+    findPh: 'CC-…',
+    findBtn: 'Find',
+    notFound: 'Order not found.',
+    sNew: 'received',
+    sTaken: 'courier assigned',
+    sDone: 'completed',
+    dispute: 'Open dispute',
+    disputePh: 'Describe the problem…',
+    disputeSend: 'Send to support',
+    disputeOk: 'Dispute sent to support',
+    disputeOkText: 'We will reply in the support bot.',
+    disputeErr: 'Failed to send the dispute.',
+  },
   feedback: {
     title: 'Feedback',
     lead: 'A question or a complaint? Write to us — we will get back to you.',
@@ -359,6 +416,7 @@ const ru: Dict = {
     cart: 'Корзина',
     faq: 'FAQ',
     feedback: 'Контакт',
+    orders: 'Заказы',
   },
   demoNotice: 'Демо-позиции — реальный каталог добавим позже.',
   closed: 'Сейчас закрыто — заказы обработаем при следующем открытии.',
@@ -414,6 +472,24 @@ const ru: Dict = {
   faq: {
     title: 'FAQ — покупка и доставка',
     empty: 'FAQ скоро появится.',
+  },
+  orders: {
+    title: 'Мои заказы',
+    lead: 'Заказы с этого устройства и поиск по номеру.',
+    empty: 'Заказов пока нет. Найдите по номеру или оформите заказ.',
+    find: 'Найти по номеру',
+    findPh: 'CC-…',
+    findBtn: 'Найти',
+    notFound: 'Заказ не найден.',
+    sNew: 'принят',
+    sTaken: 'взят курьером',
+    sDone: 'выполнен',
+    dispute: 'Открыть спор',
+    disputePh: 'Опишите проблему…',
+    disputeSend: 'Отправить в поддержку',
+    disputeOk: 'Спор отправлен в поддержку',
+    disputeOkText: 'Мы ответим в боте поддержки.',
+    disputeErr: 'Не удалось отправить спор.',
   },
   feedback: {
     title: 'Обратная связь',

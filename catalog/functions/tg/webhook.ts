@@ -8,6 +8,7 @@ type FbItem = {
   name: string
   contact: string
   text: string
+  orderId?: string
 }
 
 type CallbackQuery = {
@@ -31,6 +32,7 @@ const WELCOME = [
   '/reports — все обращения',
   '/questions — только вопросы',
   '/complaints — только жалобы',
+  '/disputes — только споры по заказам',
 ].join('\n')
 
 async function tg(token: string, method: string, payload: Record<string, unknown>): Promise<void> {
@@ -80,10 +82,11 @@ function formatList(items: FbItem[], title: string): string {
   const header = `${title} · ${items.length} шт.${more}`
   const body = shown
     .map((it, i) => {
-      const kind = it.type === 'complaint' ? 'жалоба' : 'вопрос'
+      const kind = it.type === 'complaint' ? 'жалоба' : it.type === 'dispute' ? 'спор' : 'вопрос'
       const who = it.contact ? `${it.name} · ${it.contact}` : it.name
+      const ref = it.orderId ? ` · заказ ${it.orderId}` : ''
       const text = it.text.length > 240 ? `${it.text.slice(0, 240)}…` : it.text
-      return `${i + 1}. ${it.id} · ${fmtDate(it.createdAt)}\n${who} [${kind}]\n${text}`
+      return `${i + 1}. ${it.id} [${kind}]${ref}\n${who}\n${fmtDate(it.createdAt)}\n${text}`
     })
     .join('\n\n')
   return `${header}\n\n${body}`
@@ -93,6 +96,7 @@ const TITLES: Record<string, { title: string; type: string | null }> = {
   '/reports': { title: '📋 Все обращения', type: null },
   '/questions': { title: '💬 Вопросы', type: 'question' },
   '/complaints': { title: '⚠️ Жалобы', type: 'complaint' },
+  '/disputes': { title: '⚔️ Споры', type: 'dispute' },
 }
 
 export async function onRequestPost(context: { request: Request; env: Env }): Promise<Response> {
@@ -156,7 +160,9 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
         ? { title: '💬 Вопросы', type: 'question' }
         : cb.data === 'fb:complaint'
           ? { title: '⚠️ Жалобы', type: 'complaint' }
-          : { title: '📋 Все обращения', type: null }
+          : cb.data === 'fb:dispute'
+            ? { title: '⚔️ Споры', type: 'dispute' }
+            : { title: '📋 Все обращения', type: null }
     const items = await loadFeedback(env.CATALOG)
     const filtered = spec.type ? items.filter((i) => i.type === spec.type) : items
     filtered.sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))

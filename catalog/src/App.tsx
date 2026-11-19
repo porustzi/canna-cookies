@@ -16,8 +16,9 @@ import { CheckoutView } from './components/CheckoutView'
 import { ConfirmView } from './components/ConfirmView'
 import { FaqView } from './components/FaqView'
 import { FeedbackView } from './components/FeedbackView'
+import { MyOrdersView } from './components/MyOrdersView'
 
-const ROUTES = ['cart', 'checkout', 'faq', 'feedback', 'order'] as const
+const ROUTES = ['cart', 'checkout', 'faq', 'feedback', 'orders', 'order'] as const
 
 function parseHash(): string {
   const raw = window.location.hash.replace(/^#\/?/, '')
@@ -178,6 +179,7 @@ export default function App() {
   else if (route === 'checkout') view = <CheckoutView />
   else if (route === 'faq') view = <FaqView />
   else if (route === 'feedback') view = <FeedbackView />
+  else if (route === 'orders') view = <MyOrdersView />
   else if (route === 'order') view = <ConfirmView />
 
   return (
