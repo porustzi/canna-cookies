@@ -23,7 +23,7 @@ type Update = { message?: IncomingMessage; callback_query?: CallbackQuery }
 const replyMarkup = () => JSON.stringify({ inline_keyboard: FEEDBACK_KEYBOARD })
 
 const WELCOME = [
-  'Бот поддержки CANNA COOKIES 🍪',
+  'Бот поддержки Cookies 🍪',
   '',
   'Обращения с вкладки «Контакт» приходят сюда автоматически.',
   '',

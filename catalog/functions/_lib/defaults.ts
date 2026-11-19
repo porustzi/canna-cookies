@@ -35,7 +35,7 @@ export type DefaultCatalog = {
 
 export const DEFAULT_CATALOG: DefaultCatalog = {
   categories: [
-    { id: 'flowers', name: 'CBD květy' },
+    { id: 'flowers', name: 'Květy' },
     { id: 'oils', name: 'Oleje' },
     { id: 'edibles', name: 'Dobroty' },
   ],
