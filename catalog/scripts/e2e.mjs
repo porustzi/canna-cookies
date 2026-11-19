@@ -58,11 +58,12 @@ await page.addInitScript(() => {
 const errors = []
 page.on('console', (m) => {
   if (m.type() === 'error') {
-    // ожидаемый 403: вопрос с устройства, уже сделавшего заказ (проверяем блок)
+    // ожидаемый403: вопрос с устройства, уже сделавшего заказ (проверяем блок)
     if (m.text().includes('Failed to load resource') && m.text().includes('403')) return
     errors.push(m.text())
   }
 })
+page.on('dialog', (d) => void d.accept())
 page.on('pageerror', (e) => errors.push(String(e)))
 
 const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
@@ -179,6 +180,12 @@ await page.screenshot({ path: `${OUT}/c11-dispute.png` })
 await page.click('button:has-text("Отправить в поддержку")')
 await page.waitForSelector('text=Спор отправлен в поддержку', { timeout: 5000 })
 ok(true, 'dispute submitted to support bot')
+
+// cancel order while courier has not taken it
+await page.click('button:has-text("Отменить заказ")')
+await page.waitForSelector('text=отменён', { timeout: 5000 })
+ok(true, 'order cancelled by customer')
+await page.screenshot({ path: `${OUT}/c12-cancelled.png` })
 
 // zone chip opens gate
 await page.click('header button:has-text("Зона A")')

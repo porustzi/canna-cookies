@@ -61,6 +61,13 @@ export function CartView() {
           </span>
           <span className="text-snow">{totals.delivery > 0 ? `${totals.delivery} Kč` : '0 Kč'}</span>
         </div>
+        {(data.settings.freeDeliveryFrom ?? 0) > 0 &&
+          totals.subtotal > 0 &&
+          totals.subtotal < (data.settings.freeDeliveryFrom ?? 0) && (
+            <p className="text-[13px] text-aqua/80">
+              {t.cart.freeFrom.replace('{n}', String(data.settings.freeDeliveryFrom))}
+            </p>
+          )}
         <div className="mt-1 flex justify-between border-t border-white/10 pt-3 font-display text-[16px]">
           <span className="text-snow">{t.cart.total}</span>
           <span className="text-aqua">{totals.grand} Kč</span>

@@ -48,16 +48,30 @@ export type OrderInfo = {
   createdAt?: string
   total: number
   delivery: number
+  discount: number
   grand: number
   payment?: string
   district?: { name: string; fee: number }
   assigned: boolean
   reviewed: boolean
+  reply?: string
   items: { name: string; weight: string; price: number; qty: number }[]
 }
 
 export function getOrder(id: string): Promise<OrderInfo> {
   return req<{ order: OrderInfo }>(`/api/order/${encodeURIComponent(id)}`).then((r) => r.order)
+}
+
+export function myOrders(tgId: string): Promise<OrderInfo[]> {
+  return req<{ orders: OrderInfo[] }>(`/api/myorders?tg=${encodeURIComponent(tgId)}`).then((r) => r.orders)
+}
+
+export function cancelOrder(orderId: string): Promise<{ ok: boolean }> {
+  return req('/api/cancel', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ orderId }),
+  })
 }
 
 export function openDispute(orderId: string, text: string): Promise<{ ok: boolean }> {

@@ -1,18 +1,16 @@
 import type { Env } from '../_lib/kv'
 import { putJson, readJson } from '../_lib/kv'
 import {
+  broadcastNewOrder,
   courierByChat,
   createCourier,
   createInvite,
-  getCourier,
+  editOrderMessages,
   listCouriers,
   takeInvite,
   tg,
-  takeKeyboard,
-  doneKeyboard,
-  type Courier,
 } from '../_lib/couriers'
-import { formatOrderCard, type OrderRecord } from '../_lib/orderNotify'
+import type { OrderRecord } from '../_lib/orderNotify'
 
 const TTL = 7776000 // 90 дней, как у заказа
 
@@ -42,47 +40,6 @@ const NO_ACCESS = '⛔ Нет доступа. Запросите инвайт-к
 
 function isAdmin(env: Env, chatId: number | string): boolean {
   return Boolean(env.TELEGRAM_ORDER_CHAT_ID) && String(chatId) === env.TELEGRAM_ORDER_CHAT_ID
-}
-
-async function cardFor(env: Env, order: OrderRecord, viewer: Courier | null): Promise<string> {
-  let takenByName: string | undefined
-  if (order.takenBy) {
-    const taker = await getCourier(env, order.takenBy)
-    takenByName = taker?.name
-  }
-  return formatOrderCard(order, {
-    viewerDeclined: Boolean(viewer && order.status === 'new' && order.reactions?.[viewer.id] === 'decline'),
-    takenByName,
-  })
-}
-
-function keyboardFor(order: OrderRecord, viewer: Courier | null): string | undefined {
-  if (!viewer) return undefined
-  if (order.status === 'new' && !order.reactions?.[viewer.id]) return takeKeyboard(order.id)
-  if (order.status === 'taken' && order.takenBy === viewer.id) return doneKeyboard(order.id)
-  return undefined
-}
-
-/** Редактирует все сообщения заказа у всех курьеров под их локальный вид. */
-async function editOrderMessages(env: Env, order: OrderRecord): Promise<void> {
-  const token = env.TELEGRAM_ORDER_TOKEN
-  if (!token || !order.msgIds) return
-  const couriers = await listCouriers(env)
-  const byId = new Map(couriers.map((c) => [c.id, c]))
-  for (const [courierId, ids] of Object.entries(order.msgIds)) {
-    const viewer = byId.get(courierId)
-    if (!viewer) continue
-    const text = await cardFor(env, order, viewer)
-    const markup = keyboardFor(order, viewer)
-    for (const messageId of ids) {
-      await tg(token, 'editMessageText', {
-        chat_id: viewer.chatId,
-        message_id: messageId,
-        text,
-        reply_markup: markup ? markup : JSON.stringify({ inline_keyboard: [] }),
-      })
-    }
-  }
 }
 
 async function handleCallback(env: Env, cb: CallbackQuery, token: string): Promise<void> {
@@ -144,6 +101,25 @@ async function handleCallback(env: Env, cb: CallbackQuery, token: string): Promi
     await putJson(env, key, order, TTL)
     await editOrderMessages(env, order)
     await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id, text: 'Отлично! Заказ закрыт ✅' })
+    return
+  }
+
+  if (action === 'return') {
+    if (order.status !== 'taken' || order.takenBy !== courier.id) {
+      await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id, text: 'Заказ вам не принадлежит' })
+      return
+    }
+    order.status = 'new'
+    order.takenBy = undefined
+    order.reactions = {}
+    order.reminders = 0
+    order.adminAlerted = false
+    courier.stats.taken = Math.max(0, courier.stats.taken - 1)
+    await putJson(env, `courier:${courier.id}`, courier)
+    await putJson(env, key, order, TTL)
+    await editOrderMessages(env, order)
+    await broadcastNewOrder(env, order)
+    await tg(token, 'answerCallbackQuery', { callback_query_id: cb.id, text: 'Заказ возвращён в пул' })
     return
   }
 

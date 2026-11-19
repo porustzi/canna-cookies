@@ -11,8 +11,11 @@ import {
   vProducts,
   vSettings,
 } from '../../_lib/validate'
+import { broadcastNewOrder, createInvite, editOrderMessages, listCouriers, saveCourier } from '../../_lib/couriers'
+import type { OrderRecord } from '../../_lib/orderNotify'
 
 const MAX_BODY = 4_000_000
+const ORDER_TTL = 7776000
 
 async function readJsonBody(request: Request): Promise<unknown> {
   const text = await request.text()
@@ -34,6 +37,33 @@ function toBase64(bytes: Uint8Array): string {
   return btoa(bin)
 }
 
+async function listAll(env: Env, prefix: string, limit: number): Promise<{ name: string; value: unknown }[]> {
+  const store = kv(env)
+  if (!store) return []
+  try {
+    const listed = await store.list({ prefix, limit })
+    const items = await Promise.all(
+      listed.keys.map(async (k) => {
+        const raw = await store.get(k.name)
+        if (!raw) return null
+        try {
+          return { name: k.name, value: JSON.parse(raw) }
+        } catch {
+          return null
+        }
+      }),
+    )
+    return items.filter((x): x is { name: string; value: unknown } => Boolean(x))
+  } catch {
+    return []
+  }
+}
+
+function csvCell(v: unknown): string {
+  const s = v === null || v === undefined ? '' : String(v)
+  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context
   if (!(await isAuthenticated(request, env))) return json({ error: 'unauthorized' }, 401)
@@ -47,14 +77,119 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
 
   try {
     if (path === 'state' && method === 'GET') {
-      const [categories, products, districts, settings, faq] = await Promise.all([
+      const [categories, products, districts, settings, faq, ordersRaw, feedbackRaw, couriers] = await Promise.all([
         readJson(env, 'catalog:categories', DEFAULT_CATALOG.categories),
         readJson(env, 'catalog:products', DEFAULT_CATALOG.products),
         readJson(env, 'catalog:districts', DEFAULT_CATALOG.districts),
         readJson(env, 'catalog:settings', DEFAULT_CATALOG.settings),
         readJson<Faq>(env, 'catalog:faq', DEFAULT_CATALOG.faq),
+        listAll(env, 'order:', 100),
+        listAll(env, 'fb:', 100),
+        listCouriers(env),
       ])
-      return json({ kv: true, categories, products, districts, settings, faq })
+      const orders = ordersRaw
+        .map((o) => o.value as OrderRecord)
+        .filter((o) => o && o.id)
+        .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+      const feedback = feedbackRaw
+        .map((f) => f.value as Record<string, unknown>)
+        .filter((f) => f && f.id)
+        .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
+      return json({ kv: true, categories, products, districts, settings, faq, orders, feedback, couriers })
+    }
+
+    if (path === 'orders' && method === 'PUT') {
+      const body = (await readJsonBody(request)) as { id?: unknown; action?: unknown } | null
+      const id = typeof body?.id === 'string' ? body.id.trim() : ''
+      const action = typeof body?.action === 'string' ? body.action : ''
+      if (!/^CC-[A-Z0-9]{4,24}$/i.test(id) || !['cancel', 'notify', 'delete'].includes(action)) {
+        return json({ error: 'bad-payload' }, 400)
+      }
+      const key = `order:${id.toUpperCase()}`
+      if (action === 'delete') {
+        await store.delete(key)
+        return json({ ok: true })
+      }
+      const order = await readJson<OrderRecord | null>(env, key, null)
+      if (!order) return json({ error: 'not-found' }, 404)
+      if (action === 'cancel') {
+        if (order.status !== 'new' && order.status !== 'taken') return json({ error: 'too-late' }, 409)
+        order.status = 'cancelled'
+        await putJson(env, key, order, ORDER_TTL)
+        await editOrderMessages(env, order)
+      } else {
+        await broadcastNewOrder(env, order)
+      }
+      return json({ ok: true })
+    }
+
+    if (path === 'orders.csv' && method === 'GET') {
+      const rows = await listAll(env, 'order:', 500)
+      const orders = rows
+        .map((o) => o.value as OrderRecord)
+        .filter((o) => o && o.id)
+        .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+      const header = [
+        'id', 'createdAt', 'status', 'name', 'phone', 'address', 'zone', 'items',
+        'total', 'delivery', 'discount', 'grand', 'payment', 'promo', 'lang', 'comment', 'courier',
+      ]
+      const lines = [header.join(',')]
+      for (const o of orders) {
+        lines.push(
+          [
+            o.id, o.createdAt, o.status, o.name, o.phone, o.address, o.district?.name ?? '',
+            o.items.map((i) => `${i.name} ${i.weight} x${i.qty}`).join(' | '),
+            o.total, o.delivery, o.discount ?? 0, o.grand, o.payment, o.promo ?? '', o.lang ?? '',
+            o.comment ?? '', o.takenBy ?? '',
+          ]
+            .map(csvCell)
+            .join(','),
+        )
+      }
+      return new Response(`﻿${lines.join('\n')}`, {
+        headers: {
+          'content-type': 'text/csv; charset=utf-8',
+          'content-disposition': 'attachment; filename="orders.csv"',
+          'cache-control': 'no-store',
+        },
+      })
+    }
+
+    if (path === 'feedback-reply' && method === 'PUT') {
+      const body = (await readJsonBody(request)) as { id?: unknown; orderId?: unknown; text?: unknown } | null
+      const id = typeof body?.id === 'string' ? body.id.trim() : ''
+      const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 3000) : ''
+      const orderId = typeof body?.orderId === 'string' ? body.orderId.trim().toUpperCase() : ''
+      if (!/^FB-[A-Z0-9]{4,30}$/i.test(id) || text.length < 1) return json({ error: 'bad-payload' }, 400)
+      const key = `fb:${id.toUpperCase()}`
+      const record = (await readJson<Record<string, unknown> | null>(env, key, null)) as Record<string, unknown> | null
+      if (!record) return json({ error: 'not-found' }, 404)
+      record.reply = text
+      record.repliedAt = new Date().toISOString()
+      await putJson(env, key, record, ORDER_TTL)
+      if (/^CC-[A-Z0-9]{4,24}$/i.test(orderId)) {
+        await putJson(env, `disputereply:${orderId.toUpperCase()}`, { text, at: record.repliedAt }, ORDER_TTL)
+      }
+      return json({ ok: true })
+    }
+
+    if (path === 'couriers' && method === 'PUT') {
+      const body = (await readJsonBody(request)) as { id?: unknown; action?: unknown; name?: unknown } | null
+      const action = typeof body?.action === 'string' ? body.action : ''
+      if (action === 'invite') {
+        const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 60) : ''
+        if (name.length < 2) return json({ error: 'bad-payload' }, 400)
+        const code = await createInvite(env, name)
+        return json({ ok: true, code, link: `https://t.me/cookies_orders_bot?start=${code}` })
+      }
+      const id = typeof body?.id === 'string' ? body.id.trim() : ''
+      if (!id || !['toggle'].includes(action)) return json({ error: 'bad-payload' }, 400)
+      const couriers = await listCouriers(env)
+      const courier = couriers.find((c) => c.id === id)
+      if (!courier) return json({ error: 'not-found' }, 404)
+      courier.active = action === 'toggle' ? !courier.active : courier.active
+      await saveCourier(env, courier)
+      return json({ ok: true, courier })
     }
 
     if (path === 'products' && method === 'PUT') {

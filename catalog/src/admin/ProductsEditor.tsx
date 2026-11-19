@@ -153,6 +153,19 @@ export function ProductsEditor({
     patch({ weights: form.weights.map((x, idx) => (idx === i ? { ...x, ...w } : x)) })
   }
 
+  const moveProduct = async (index: number, dir: -1 | 1) => {
+    const j = index + dir
+    if (j < 0 || j >= state.products.length) return
+    const next = [...state.products]
+    ;[next[index], next[j]] = [next[j], next[index]]
+    try {
+      await api.saveProducts(next)
+      onSaved('Порядок обновлён')
+    } catch (e) {
+      notify(e instanceof Error ? e.message : 'Ошибка сохранения')
+    }
+  }
+
   const preview = pendingImage
     ? pendingImage.url
     : form && !isNew && form.image && !imageRemoved
@@ -196,6 +209,22 @@ export function ProductsEditor({
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => void moveProduct(state.products.indexOf(p), -1)}
+                  aria-label="Выше"
+                  className="grid h-10 w-8 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void moveProduct(state.products.indexOf(p), 1)}
+                  aria-label="Ниже"
+                  className="grid h-10 w-8 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+                >
+                  ↓
+                </button>
                 <button
                   type="button"
                   onClick={() => void toggleAvailable(p)}

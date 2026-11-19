@@ -3,14 +3,40 @@ import { api, emptyL, type AdminState } from './api'
 import { Field, LangTriple } from './ui'
 import type { L, Settings } from '../types'
 
+const DAYS: { key: string; label: string }[] = [
+  { key: 'mon', label: 'Пн' },
+  { key: 'tue', label: 'Вт' },
+  { key: 'wed', label: 'Ср' },
+  { key: 'thu', label: 'Чт' },
+  { key: 'fri', label: 'Пт' },
+  { key: 'sat', label: 'Сб' },
+  { key: 'sun', label: 'Вс' },
+]
+
+const RANGE_RE = /^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$/
+
+function cloneL(l: L | undefined): L {
+  return { ...(l ?? emptyL()) }
+}
+
 function clone(s: Settings): Settings {
-  return {
+  const out: Settings = {
     payment: s.payment.map((p) => ({ ...p })),
     minOrder: s.minOrder,
     hours: { ...s.hours },
     closed: s.closed,
     banner: { ...s.banner },
+    contacts: { phone: s.contacts?.phone ?? '', tg: s.contacts?.tg ?? '', address: s.contacts?.address ?? '' },
+    freeDeliveryFrom: s.freeDeliveryFrom ?? 0,
+    promo: s.promo ? { ...s.promo } : null,
+    texts: {
+      demo: cloneL(s.texts?.demo),
+      closed: cloneL(s.texts?.closed),
+      privacy: cloneL(s.texts?.privacy),
+    },
+    schedule: { ...(s.schedule ?? {}) },
   }
+  return out
 }
 
 export function SettingsEditor({ state, onSaved }: { state: AdminState; onSaved: (msg: string) => void }) {
@@ -42,15 +68,38 @@ export function SettingsEditor({ state, onSaved }: { state: AdminState; onSaved:
       setError('Минимальный заказ — целое число ≥ 0.')
       return
     }
+    if (!Number.isInteger(data.freeDeliveryFrom ?? 0) || (data.freeDeliveryFrom ?? 0) < 0) {
+      setError('Бесплатная доставка — целое число ≥ 0.')
+      return
+    }
     for (const p of data.payment) {
       if (!p.ru && !p.cs && !p.en) {
         setError('Укажите способ оплаты хотя бы на одном языке или удалите строку.')
         return
       }
     }
+    const promoCode = data.promo?.code?.trim() ?? ''
+    if (promoCode) {
+      const pct = data.promo?.percent ?? 0
+      if (!Number.isInteger(pct) || pct < 1 || pct > 90) {
+        setError('Промокод: скидка — целое число от1 до90%.')
+        return
+      }
+    }
+    for (const [day, range] of Object.entries(data.schedule ?? {})) {
+      if (range && !RANGE_RE.test(range)) {
+        setError(`Расписание (${day}): формат 10:00-20:00`)
+        return
+      }
+    }
     setSaving(true)
     try {
-      await api.saveSettings(data)
+      const payload: Settings = {
+        ...data,
+        promo: promoCode ? { code: promoCode, percent: data.promo?.percent ?? 0 } : null,
+        schedule: data.schedule ?? {},
+      }
+      await api.saveSettings(payload)
       setDirty(false)
       onSaved('Настройки сохранены')
     } catch (e) {
@@ -60,10 +109,14 @@ export function SettingsEditor({ state, onSaved }: { state: AdminState; onSaved:
     }
   }
 
+  const contacts = data.contacts ?? { phone: '', tg: '', address: '' }
+  const texts = data.texts ?? { demo: emptyL(), closed: emptyL(), privacy: emptyL() }
+  const schedule = data.schedule ?? {}
+
   return (
     <div className="grid max-w-3xl gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[13.5px] leading-relaxed text-mist/70">Баннер, часы и способы оплаты — на всех трёх языках.</p>
+        <p className="text-[13.5px] leading-relaxed text-mist/70">Баннер, часы, контакты, доставка и оплата — на всех трёх языках.</p>
         <div className="flex flex-wrap items-center gap-3">
           {dirty ? (
             <span className="font-display text-[10px] uppercase tracking-[0.2em] text-[#FFD28F] sm:text-[11px]">Есть несохранённые правки</span>
@@ -100,6 +153,14 @@ export function SettingsEditor({ state, onSaved }: { state: AdminState; onSaved:
               type="number"
             />
           </div>
+          <div className="min-w-[200px] flex-1">
+            <Field
+              label="Бесплатная доставка от, Kč (0 — выкл.)"
+              value={data.freeDeliveryFrom ?? 0}
+              onChange={(v) => update({ freeDeliveryFrom: v === '' ? 0 : Number(v) })}
+              type="number"
+            />
+          </div>
         </div>
         <LangTriple
           label="Баннер (строка над каталогом)"
@@ -107,7 +168,67 @@ export function SettingsEditor({ state, onSaved }: { state: AdminState; onSaved:
           onChange={(v) => update({ banner: v })}
           placeholder="Пусто — баннер не показывается"
         />
-        <LangTriple label="Часы работы" value={data.hours} onChange={(v) => update({ hours: v })} placeholder="Пн–Сб 10:00–20:00" />
+        <LangTriple label="Часы работы (текст)" value={data.hours} onChange={(v) => update({ hours: v })} placeholder="Пн–Сб 10:00–20:00" />
+      </div>
+
+      <div className="cc-card grid gap-4 p-4 sm:p-6">
+        <span className="cc-eyebrow">Контакты магазина (видны в приложении)</span>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Телефон" value={contacts.phone} onChange={(v) => update({ contacts: { ...contacts, phone: v } })} placeholder="+420 …" />
+          <Field label="Telegram" value={contacts.tg} onChange={(v) => update({ contacts: { ...contacts, tg: v } })} placeholder="@username" />
+        </div>
+        <Field
+          label="Адрес (склад/самовывоз)"
+          value={contacts.address}
+          onChange={(v) => update({ contacts: { ...contacts, address: v } })}
+          placeholder="Ulice, město"
+        />
+      </div>
+
+      <div className="cc-card grid gap-4 p-4 sm:p-6">
+        <span className="cc-eyebrow">Промокод (0 полей — выкл.)</span>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            label="Код"
+            value={data.promo?.code ?? ''}
+            onChange={(v) => update({ promo: v.trim() ? { code: v, percent: data.promo?.percent ?? 10 } : null })}
+            placeholder="ЛЕТО20"
+          />
+          <Field
+            label="Скидка, %"
+            value={data.promo?.percent ?? 10}
+            onChange={(v) =>
+              update({ promo: (data.promo?.code ?? v) ? { code: data.promo?.code ?? '', percent: v === '' ? 10 : Number(v) } : null })
+            }
+            type="number"
+          />
+        </div>
+        <p className="text-[12.5px] text-mist/50">Клиент вводит код при оформлении — скидка применяется к сумме товаров.</p>
+      </div>
+
+      <div className="cc-card grid gap-4 p-4 sm:p-6">
+        <span className="cc-eyebrow">Расписание по дням (пусто — всегда открыт, кроме тумблера)</span>
+        <div className="grid gap-2">
+          {DAYS.map((d) => (
+            <div key={d.key} className="flex items-center gap-3">
+              <span className="w-8 font-display text-[12px] uppercase tracking-[0.14em] text-mist">{d.label}</span>
+              <input
+                value={schedule[d.key] ?? ''}
+                onChange={(e) => update({ schedule: { ...schedule, [d.key]: e.target.value.trim() } })}
+                placeholder="10:00-20:00"
+                className="flex-1 rounded-xl border border-white/12 bg-graphite px-3.5 py-2.5 text-[14px] text-snow placeholder:text-mist/40 outline-none focus:border-aqua/60"
+              />
+            </div>
+          ))}
+        </div>
+        <p className="text-[12.5px] text-mist/50">Формат HH:MM-HH:MM (по Праге). Пусто — день не ограничен.</p>
+      </div>
+
+      <div className="cc-card grid gap-4 p-4 sm:p-6">
+        <span className="cc-eyebrow">Тексты интерфейса (пусто — стандартный текст)</span>
+        <LangTriple label="Демо-баннер каталога" value={texts.demo} onChange={(v) => update({ texts: { ...texts, demo: v } })} />
+        <LangTriple label="Сообщение «магазин закрыт»" value={texts.closed} onChange={(v) => update({ texts: { ...texts, closed: v } })} />
+        <LangTriple label="Privacy в контакт-форме" value={texts.privacy} onChange={(v) => update({ texts: { ...texts, privacy: v } })} />
       </div>
 
       <div className="cc-card grid gap-4 p-4 sm:p-6">

@@ -22,6 +22,8 @@ function Form({
   const [tried, setTried] = useState(false)
 
   const valid = districtId !== '' && address.trim().length >= 3
+  const selected = data.districts.find((d) => d.id === districtId)
+  const coverage = selected ? pick(selected.coverage, lang) : ''
 
   return (
     <form
@@ -52,6 +54,7 @@ function Form({
             </option>
           ))}
         </select>
+        {coverage && <p className="mt-2 text-[12.5px] leading-relaxed text-mist/60">{coverage}</p>}
       </label>
 
       <label className="block">

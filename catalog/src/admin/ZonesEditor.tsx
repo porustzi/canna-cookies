@@ -26,6 +26,14 @@ export function ZonesEditor({ state, onSaved }: { state: AdminState; onSaved: (m
     setError(null)
   }
 
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir
+    if (j < 0 || j >= items.length) return
+    const next = [...items]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    update(next)
+  }
+
   const save = async () => {
     const cleaned = items.map((d) => ({ ...d, id: d.id.trim() }))
     for (const d of cleaned) {
@@ -95,7 +103,23 @@ export function ZonesEditor({ state, onSaved }: { state: AdminState; onSaved: (m
                 }
                 type="number"
               />
-              <div className="flex items-end">
+              <div className="flex items-end gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => move(i, -1)}
+                  aria-label="Выше"
+                  className="grid h-11 w-9 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(i, 1)}
+                  aria-label="Ниже"
+                  className="grid h-11 w-9 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+                >
+                  ↓
+                </button>
                 <button
                   type="button"
                   onClick={() => update(items.filter((_, idx) => idx !== i))}
@@ -118,6 +142,14 @@ export function ZonesEditor({ state, onSaved }: { state: AdminState; onSaved: (m
               onChange={(v) => update(items.map((x, idx) => (idx === i ? { ...x, eta: v } : x)))}
               placeholder="до 60 мин"
             />
+            <div className="md:col-span-2">
+              <LangTriple
+                label="Покрытие (адреса/улицы зоны, необязательно)"
+                value={d.coverage ?? { ru: '', cs: '', en: '' }}
+                onChange={(v) => update(items.map((x, idx) => (idx === i ? { ...x, coverage: v } : x)))}
+                placeholder="Например: Прага5, Смихов, только центр…"
+              />
+            </div>
           </div>
         ))}
       </div>

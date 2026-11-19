@@ -19,13 +19,15 @@ export function CatalogView() {
 
       {data.settings.closed && (
         <div className="rounded-xl border border-[#FFD28F]/30 bg-[#FFD28F]/[0.07] px-4 py-3 text-[13.5px] leading-relaxed text-[#FFD28F]">
-          {t.closed}
+          {pick(data.settings.texts?.closed, lang) || t.closed}
         </div>
       )}
 
-      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[13px] leading-relaxed text-mist/80">
-        {t.demoNotice}
-      </div>
+      {(pick(data.settings.texts?.demo, lang) || t.demoNotice) && (
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[13px] leading-relaxed text-mist/80">
+          {pick(data.settings.texts?.demo, lang) || t.demoNotice}
+        </div>
+      )}
 
       {pick(data.settings.hours, lang) && (
         <p className="font-display text-[11px] uppercase tracking-[0.18em] text-mist/60">

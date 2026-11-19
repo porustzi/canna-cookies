@@ -59,7 +59,7 @@ await page.waitForTimeout(1500)
 ok((await page.locator('text=Админка').count()) > 0, 'dashboard after UI login', page.url())
 await page.screenshot({ path: `${OUT}/dashboard.png` })
 
-for (const tab of ['Товары', 'Категории', 'Зоны', 'Настройки', 'FAQ']) {
+for (const tab of ['Заказы', 'Обращения', 'Курьеры', 'Товары', 'Категории', 'Зоны', 'Настройки', 'FAQ']) {
   await page.click(`nav button:has-text("${tab}")`)
   await page.waitForTimeout(500)
   await page.screenshot({ path: `${OUT}/tab-${tab}.png` })

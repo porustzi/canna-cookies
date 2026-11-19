@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useApp } from '../context'
-import { cartTotals, linePrice } from '../cart'
+import { cartTotals, linePrice, promoDiscount } from '../cart'
 import { submitOrder } from '../api'
 import { addMyOrder, writeLastOrder } from '../storage'
 import { pick } from '../types'
 import type { OrderLine } from '../types'
 
 export function CheckoutView() {
-  const { t, data, lang, cart, zone, saveZone, go, clearCart } = useApp()
+  const { t, data, lang, cart, zone, saveZone, go, clearCart, tgUser } = useApp()
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -16,12 +16,17 @@ export function CheckoutView() {
   const paymentOptions = data.settings.payment
   const [paymentIdx, setPaymentIdx] = useState<number | null>(paymentOptions.length > 0 ? 0 : null)
   const [comment, setComment] = useState('')
+  const [promo, setPromo] = useState('')
   const [website, setWebsite] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   const district = data.districts.find((d) => d.id === districtId)
   const totals = cartTotals(data, cart, district?.fee ?? 0)
+  const discount = promoDiscount(data, promo, totals.subtotal)
+  const grand = Math.max(0, totals.grand - discount)
+  const promoConfigured = Boolean(data.settings.promo?.code)
+  const promoWrong = promoConfigured && promo.trim() !== '' && discount === 0
 
   const lines: OrderLine[] = cart.flatMap((item) => {
     const product = data.products.find((p) => p.id === item.productId)
@@ -35,6 +40,10 @@ export function CheckoutView() {
 
   const submit = async () => {
     setError(null)
+    if (data.settings.closed) {
+      setError(t.closed)
+      return
+    }
     if (name.trim().length < 2 || phone.replace(/\D/g, '').length < 6 || address.trim().length < 3) {
       setError(t.required)
       return
@@ -55,6 +64,8 @@ export function CheckoutView() {
         comment: comment.trim(),
         website,
         lang,
+        tgId: tgUser?.id ? String(tgUser.id) : undefined,
+        promo: promo.trim() || undefined,
       })
       saveZone({ districtId, address: address.trim() })
       clearCart()
@@ -63,7 +74,13 @@ export function CheckoutView() {
       go('order')
     } catch (e) {
       const msg = e instanceof Error ? e.message : ''
-      setError(msg === 'rate-limited' ? t.rateLimit : t.error)
+      const map: Record<string, string> = {
+        'rate-limited': t.rateLimit,
+        closed: t.closed,
+        'min-order': t.cart.minOrder.replace('{n}', String(data.settings.minOrder)),
+        'sold-out': t.catalog.soldOut,
+      }
+      setError(map[msg] ?? t.error)
     } finally {
       setBusy(false)
     }
@@ -99,9 +116,17 @@ export function CheckoutView() {
           <span>{t.cart.delivery}</span>
           <span className="text-snow">{totals.delivery > 0 ? `${totals.delivery} Kč` : '0 Kč'}</span>
         </div>
+        {discount > 0 && (
+          <div className="flex justify-between text-mist">
+            <span>
+              {t.checkout.promo} · {data.settings.promo?.code}
+            </span>
+            <span className="text-aqua">−{discount} Kč</span>
+          </div>
+        )}
         <div className="mt-1 flex justify-between border-t border-white/10 pt-2 font-display text-[16px]">
           <span className="text-snow">{t.cart.total}</span>
-          <span className="text-aqua">{totals.grand} Kč</span>
+          <span className="text-aqua">{grand} Kč</span>
         </div>
       </div>
 
@@ -180,6 +205,20 @@ export function CheckoutView() {
               ))}
             </div>
           </div>
+        )}
+
+        {promoConfigured && (
+          <label className="block">
+            <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.checkout.promo}</span>
+            <input
+              value={promo}
+              onChange={(e) => setPromo(e.target.value)}
+              placeholder={t.checkout.promoPh}
+              autoCapitalize="characters"
+              className="mt-2 w-full rounded-xl border border-white/12 bg-graphite px-4 py-3.5 text-[15px] uppercase text-snow placeholder:normal-case placeholder:text-mist/40 outline-none focus:border-aqua/60"
+            />
+            {promoWrong && <p className="mt-1 text-[12.5px] text-[#FFD28F]">{t.checkout.promoBad}</p>}
+          </label>
         )}
 
         <label className="block">

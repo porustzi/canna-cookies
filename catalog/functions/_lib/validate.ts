@@ -1,4 +1,17 @@
-import { LANGS, type Category, type District, type Faq, type FaqItem, type L, type Lang, type Product, type Settings, type Weight } from './defaults'
+import {
+  LANGS,
+  type Category,
+  type Contacts,
+  type District,
+  type Faq,
+  type FaqItem,
+  type L,
+  type Lang,
+  type Product,
+  type Promo,
+  type Settings,
+  type Weight,
+} from './defaults'
 
 export const MAX_PRODUCTS = 200
 export const MAX_CATEGORIES = 30
@@ -128,7 +141,13 @@ export function vDistrict(value: unknown): District | null {
   if (!eta) return null
   const fee = value.fee
   if (typeof fee !== 'number' || !Number.isInteger(fee) || fee < 0 || fee > 100_000) return null
-  return { id, name, fee, eta }
+  const out: District = { id, name, fee, eta }
+  if (value.coverage !== undefined && value.coverage !== null) {
+    const coverage = vL(value.coverage, 300)
+    if (!coverage) return null
+    out.coverage = coverage
+  }
+  return out
 }
 
 export function vDistricts(value: unknown): District[] | null {
@@ -142,6 +161,53 @@ export function vDistricts(value: unknown): District[] | null {
     out.push(d)
   }
   return out
+}
+
+function vContacts(value: unknown): Contacts | null {
+  if (value === undefined || value === null) return { phone: '', tg: '', address: '' }
+  if (!isObj(value)) return null
+  const phone = typeof value.phone === 'string' ? value.phone.trim().slice(0, 40) : null
+  const tg = typeof value.tg === 'string' ? value.tg.trim().slice(0, 64) : null
+  const address = typeof value.address === 'string' ? value.address.trim().slice(0, 200) : null
+  if (phone === null || tg === null || address === null) return null
+  return { phone, tg, address }
+}
+
+function vPromo(value: unknown): Promo | null | undefined {
+  if (value === undefined) return undefined
+  if (value === null) return null
+  if (!isObj(value)) return null
+  const code = typeof value.code === 'string' ? value.code.trim().slice(0, 30) : ''
+  const percent = value.percent
+  if (typeof percent !== 'number' || !Number.isInteger(percent) || percent < 1 || percent > 90) return null
+  if (!code) return null
+  return { code, percent }
+}
+
+const SCHEDULE_DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+const RANGE_RE = /^([01]\d|2[0-3]):[0-5]\d-([01]\d|2[0-3]):[0-5]\d$/
+
+function vSchedule(value: unknown): Record<string, string> | undefined {
+  if (value === undefined || value === null) return undefined
+  if (!isObj(value)) return null
+  const out: Record<string, string> = {}
+  for (const day of SCHEDULE_DAYS) {
+    const raw = value[day]
+    if (raw === undefined || raw === '') continue
+    if (typeof raw !== 'string' || !RANGE_RE.test(raw)) return null
+    out[day] = raw
+  }
+  return out
+}
+
+function vTexts(value: unknown): { demo: L; closed: L; privacy: L } | undefined {
+  if (value === undefined || value === null) return undefined
+  if (!isObj(value)) return null
+  const demo = vL(value.demo, 300)
+  const closed = vL(value.closed, 300)
+  const privacy = vL(value.privacy, 500)
+  if (!demo || !closed || !privacy) return null
+  return { demo, closed, privacy }
 }
 
 export function vSettings(value: unknown): Settings | null {
@@ -161,7 +227,32 @@ export function vSettings(value: unknown): Settings | null {
   if (typeof value.closed !== 'boolean') return null
   const banner = vL(value.banner, 300)
   if (!banner) return null
-  return { payment, minOrder, hours, closed: value.closed, banner }
+
+  const out: Settings = { payment, minOrder, hours, closed: value.closed, banner }
+
+  const contacts = vContacts(value.contacts)
+  if (contacts === null) return null
+  out.contacts = contacts
+
+  const freeDeliveryFrom = value.freeDeliveryFrom
+  if (freeDeliveryFrom !== undefined && freeDeliveryFrom !== null) {
+    if (typeof freeDeliveryFrom !== 'number' || !Number.isInteger(freeDeliveryFrom) || freeDeliveryFrom < 0 || freeDeliveryFrom > 1_000_000) return null
+    out.freeDeliveryFrom = freeDeliveryFrom
+  }
+
+  const promo = vPromo(value.promo)
+  if (promo === null) return null
+  if (promo !== undefined) out.promo = promo
+
+  const texts = vTexts(value.texts)
+  if (texts === null) return null
+  if (texts) out.texts = texts
+
+  const schedule = vSchedule(value.schedule)
+  if (schedule === null) return null
+  if (schedule) out.schedule = schedule
+
+  return out
 }
 
 export function vFaqItem(value: unknown): FaqItem | null {

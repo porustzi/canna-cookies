@@ -1,8 +1,9 @@
-import { DEFAULT_CATALOG, parseLang, pickL, type Product } from '../_lib/defaults'
+import { DEFAULT_CATALOG, parseLang, pickL, type Product, type Settings } from '../_lib/defaults'
 import { clientIp, int, json, putJson, readBody, readJson, str, type Env } from '../_lib/kv'
 import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFailure } from '../_lib/ratelimit'
 import { isGarbage } from '../_lib/garbage'
 import { broadcastNewOrder } from '../_lib/couriers'
+import { isOpenBySchedule } from '../_lib/schedule'
 import type { OrderRecord } from '../_lib/orderNotify'
 
 type RawLine = { productId?: unknown; weight?: unknown; qty?: unknown }
@@ -17,9 +18,12 @@ type RawOrder = {
   comment?: unknown
   website?: unknown
   lang?: unknown
+  tgId?: unknown
+  promo?: unknown
 }
 
 const TTL = 7776000 // 90 дней
+const IPORDER_TTL = 172800 // маркер «устройство заказывало» — 48 часов
 
 function orderId(): string {
   const time = Date.now().toString(36).toUpperCase()
@@ -55,6 +59,8 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const payment = typeof body.payment === 'string' ? body.payment.slice(0, 100) : ''
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
   const lang = parseLang(body.lang) ?? 'cs'
+  const tgId = typeof body.tgId === 'string' && /^\d{1,20}$/.test(body.tgId) ? body.tgId : undefined
+  const promoCode = typeof body.promo === 'string' ? body.promo.trim().slice(0, 30) : ''
 
   // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
   if (isGarbage(name, comment)) {
@@ -64,6 +70,13 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   if (!name || name.length < 2) return fail()
   if (!phoneRaw || phoneRaw.replace(/\D/g, '').length < 6) return fail()
   if (!address || address.length < 3) return fail()
+
+  const settings = await readJson<Settings>(env, 'catalog:settings', DEFAULT_CATALOG.settings)
+
+  // магазин закрыт (ручной тумблер или расписание по дням)
+  if (settings.closed || isOpenBySchedule(settings.schedule) === false) {
+    return json({ error: 'closed' }, 403)
+  }
 
   if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 50) return fail()
 
@@ -81,6 +94,8 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
     const product = products.find((p) => p.id === productId)
     if (!product) return fail()
+    // товар снят с наличия — отказываем (гонка «распродано»)
+    if (!product.available) return json({ error: 'sold-out' }, 409)
     const weight = product.weights.find((w) => w.label === weightLabel)
     if (!weight) return fail()
 
@@ -88,15 +103,31 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     total += weight.price * qty
   }
 
-  // 1 заказ в час с устройства — только после успешной валидации
+  // минимальная сумма заказа
+  if (settings.minOrder > 0 && total < settings.minOrder) {
+    return json({ error: 'min-order', minOrder: settings.minOrder }, 400)
+  }
+
+  // 1 заказ в минуту с устройства — только после успешной валидации
   const cool = await cooldownRemaining(env, 'order', ip)
   if (cool > 0) {
     return json({ error: 'rate-limited' }, 429, { 'retry-after': String(cool) })
   }
 
   const district = districts.find((d) => d.id === districtId)
-  const delivery = district ? district.fee : 0
-  const grand = total + delivery
+  let delivery = district ? district.fee : 0
+  if ((settings.freeDeliveryFrom ?? 0) > 0 && total >= (settings.freeDeliveryFrom ?? 0)) delivery = 0
+
+  // промокод
+  let discount = 0
+  let promoApplied = ''
+  const promo = settings.promo
+  if (promo && promo.code && promoCode && promoCode.toLowerCase() === promo.code.toLowerCase()) {
+    discount = Math.min(total, Math.round((total * promo.percent) / 100))
+    promoApplied = promo.code
+  }
+
+  const grand = Math.max(0, total + delivery - discount)
 
   const id = orderId()
   const order: OrderRecord = {
@@ -113,6 +144,9 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     payment,
     comment,
     lang,
+    tgId,
+    discount,
+    promo: promoApplied || undefined,
     total,
     delivery,
     grand,
@@ -121,9 +155,9 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
   await markCooldown(env, 'order', ip, 60)
-  // это устройство сделало заказ — с него больше не принимаем «вопросы»
+  // это устройство сделало заказ —48 часов не принимаем «вопросы»
   try {
-    await env.CATALOG?.put(`iporder:${ip}`, String(Date.now()), { expirationTtl: TTL })
+    await env.CATALOG?.put(`iporder:${ip}`, String(Date.now()), { expirationTtl: IPORDER_TTL })
   } catch {
     /* KV недоступен — маркер не ставим */
   }

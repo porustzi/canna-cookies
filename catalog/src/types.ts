@@ -18,7 +18,11 @@ export type Product = {
 
 export type Category = { id: string; name: L }
 
-export type District = { id: string; name: L; fee: number; eta: L }
+export type District = { id: string; name: L; fee: number; eta: L; coverage?: L }
+
+export type Contacts = { phone: string; tg: string; address: string }
+
+export type Promo = { code: string; percent: number }
 
 export type Settings = {
   payment: L[]
@@ -26,6 +30,11 @@ export type Settings = {
   hours: L
   closed: boolean
   banner: L
+  contacts?: Contacts
+  freeDeliveryFrom?: number
+  promo?: Promo | null
+  texts?: { demo: L; closed: L; privacy: L }
+  schedule?: Record<string, string>
 }
 
 export type FaqItem = { q: string; a: string }
@@ -63,4 +72,6 @@ export type OrderPayload = {
   comment: string
   website: string
   lang: Lang
+  tgId?: string
+  promo?: string
 }

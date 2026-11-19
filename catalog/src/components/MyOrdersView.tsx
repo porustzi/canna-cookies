@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useApp } from '../context'
-import { confirmReceived, getOrder, openDispute, type OrderInfo } from '../api'
+import { cancelOrder, confirmReceived, getOrder, myOrders, openDispute, type OrderInfo } from '../api'
 import { addMyOrder, readMyOrders, type MyOrder } from '../storage'
 
 type Entry = { local: MyOrder; info: OrderInfo | null; loading: boolean; error: boolean }
@@ -14,7 +14,7 @@ function fmtDate(iso?: string): string {
 }
 
 export function MyOrdersView() {
-  const { t } = useApp()
+  const { t, tgUser } = useApp()
   const [entries, setEntries] = useState<Entry[]>(() => readMyOrders().map((local) => ({ local, info: null, loading: true, error: false })))
   const [findId, setFindId] = useState('')
   const [findState, setFindState] = useState<'idle' | 'busy' | 'missing'>('idle')
@@ -25,6 +25,7 @@ export function MyOrdersView() {
   const [disputeErr, setDisputeErr] = useState<string | null>(null)
   const [receiveBusy, setReceiveBusy] = useState(false)
   const [receiveErr, setReceiveErr] = useState<string | null>(null)
+  const [cancelErr, setCancelErr] = useState<string | null>(null)
 
   const loadOne = useCallback(async (id: string) => {
     setEntries((prev) => prev.map((e) => (e.local.id === id ? { ...e, loading: true, error: false } : e)))
@@ -37,7 +38,25 @@ export function MyOrdersView() {
   }, [])
 
   useEffect(() => {
+    const ids = new Set(entries.map((e) => e.local.id))
     for (const e of entries) void loadOne(e.local.id)
+
+    // сквозная история: заказы, оформленные с этого TG-аккаунта на любом устройстве
+    if (tgUser?.id) {
+      void myOrders(String(tgUser.id))
+        .then((orders) => {
+          const fresh = orders.filter((o) => !ids.has(o.id))
+          if (fresh.length === 0) return
+          setEntries((prev) => {
+            const have = new Set(prev.map((p) => p.local.id))
+            const add = fresh
+              .filter((o) => !have.has(o.id))
+              .map((o) => ({ local: { id: o.id, at: Date.parse(o.createdAt ?? '') || Date.now() }, info: o, loading: false, error: false }))
+            return [...prev, ...add].sort((a, b) => b.local.at - a.local.at)
+          })
+        })
+        .catch(() => {})
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -97,7 +116,23 @@ export function MyOrdersView() {
         ? t.orders.sTaken
         : status === 'done'
           ? t.orders.sDone
-          : status
+          : status === 'cancelled'
+            ? t.orders.sCancelled
+            : status
+
+  const cancelOrderFlow = async (orderId: string) => {
+    if (!window.confirm(t.orders.cancelConfirm)) return
+    setCancelErr(null)
+    try {
+      await cancelOrder(orderId)
+      setEntries((prev) =>
+        prev.map((e) => (e.local.id === orderId && e.info ? { ...e, info: { ...e.info, status: 'cancelled' } } : e)),
+      )
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : ''
+      setCancelErr(msg === 'too-late' ? t.orders.cancelTooLate : msg === 'rate-limited' ? t.rateLimit : t.orders.cancelErr)
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -167,6 +202,12 @@ export function MyOrdersView() {
                     </li>
                   ))}
                 </ul>
+                {e.info.reply && (
+                  <div className="rounded-xl border border-aqua/40 bg-aqua/[0.07] p-3">
+                    <p className="font-display text-[12px] uppercase tracking-[0.16em] text-aqua">{t.orders.replyTitle}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-[13.5px] leading-relaxed text-snow">{e.info.reply}</p>
+                  </div>
+                )}
               </>
             )}
 
@@ -201,8 +242,18 @@ export function MyOrdersView() {
                       ⚔️ {t.orders.dispute}
                     </button>
                   )}
+                  {e.info.status === 'new' && (
+                    <button
+                      type="button"
+                      onClick={() => void cancelOrderFlow(e.local.id)}
+                      className="cc-btn-ghost px-4 py-2 text-[11px] hover:border-[rgba(255,90,90,0.5)] hover:text-[#FF9D9D]"
+                    >
+                      ✕ {t.orders.cancel}
+                    </button>
+                  )}
                 </div>
 
+                {cancelErr && <p className="text-[13px] text-[#FF9D9D]">{cancelErr}</p>}
                 {receiveErr && <p className="text-[13px] text-[#FF9D9D]">{receiveErr}</p>}
 
                 {disputeFor === e.local.id && (

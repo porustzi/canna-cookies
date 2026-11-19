@@ -136,7 +136,53 @@ export function takeKeyboard(id: string): string {
 }
 
 export function doneKeyboard(id: string): string {
-  return JSON.stringify({ inline_keyboard: [[{ text: '✅ Заказ выполнен', callback_data: `ord:${id}:done` }]] })
+  return JSON.stringify({
+    inline_keyboard: [
+      [{ text: '✅ Заказ выполнен', callback_data: `ord:${id}:done` }],
+      [{ text: '↩️ Вернуть в пул', callback_data: `ord:${id}:return` }],
+    ],
+  })
+}
+
+async function cardFor(env: Env, order: OrderRecord, viewer: Courier | null): Promise<string> {
+  let takenByName: string | undefined
+  if (order.takenBy) {
+    const taker = await getCourier(env, order.takenBy)
+    takenByName = taker?.name
+  }
+  return formatOrderCard(order, {
+    viewerDeclined: Boolean(viewer && order.status === 'new' && order.reactions?.[viewer.id] === 'decline'),
+    takenByName,
+  })
+}
+
+function keyboardFor(order: OrderRecord, viewer: Courier | null): string | undefined {
+  if (!viewer) return undefined
+  if (order.status === 'new' && !order.reactions?.[viewer.id]) return takeKeyboard(order.id)
+  if (order.status === 'taken' && order.takenBy === viewer.id) return doneKeyboard(order.id)
+  return undefined
+}
+
+/** Редактирует все сообщения заказа у всех курьеров под их локальный вид. */
+export async function editOrderMessages(env: Env, order: OrderRecord): Promise<void> {
+  const token = env.TELEGRAM_ORDER_TOKEN
+  if (!token || !order.msgIds) return
+  const couriers = await listCouriers(env)
+  const byId = new Map(couriers.map((c) => [c.id, c]))
+  for (const [courierId, ids] of Object.entries(order.msgIds)) {
+    const viewer = byId.get(courierId)
+    if (!viewer) continue
+    const text = await cardFor(env, order, viewer)
+    const markup = keyboardFor(order, viewer)
+    for (const messageId of ids) {
+      await tg(token, 'editMessageText', {
+        chat_id: viewer.chatId,
+        message_id: messageId,
+        text,
+        reply_markup: markup ? markup : JSON.stringify({ inline_keyboard: [] }),
+      })
+    }
+  }
 }
 
 // ---------- Рассылка ----------
@@ -161,7 +207,7 @@ export async function broadcastNewOrder(env: Env, order: OrderRecord): Promise<v
     return
   }
 
-  const msgIds: Record<string, number[]> = {}
+  const msgIds: Record<string, number[]> = { ...(order.msgIds ?? {}) }
   for (const courier of couriers) {
     const res = await tg(token, 'sendMessage', {
       chat_id: courier.chatId,
@@ -169,7 +215,7 @@ export async function broadcastNewOrder(env: Env, order: OrderRecord): Promise<v
       reply_markup: takeKeyboard(order.id),
     })
     const messageId = (res?.result as { message_id?: number } | undefined)?.message_id
-    if (messageId) msgIds[courier.id] = [messageId]
+    if (messageId) msgIds[courier.id] = [...(msgIds[courier.id] ?? []), messageId].slice(-10)
   }
 
   order.msgIds = msgIds

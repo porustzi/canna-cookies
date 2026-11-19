@@ -38,11 +38,22 @@ export function cartTotals(data: CatalogData, cart: CartItem[], districtFee: num
       anyGrams = true
     }
   }
+  let delivery = cart.length > 0 ? districtFee : 0
+  const freeFrom = data.settings.freeDeliveryFrom ?? 0
+  if (freeFrom > 0 && subtotal >= freeFrom) delivery = 0
   return {
     count: cart.reduce((n, i) => n + i.qty, 0),
     subtotal,
-    delivery: cart.length > 0 ? districtFee : 0,
-    grand: subtotal + (cart.length > 0 ? districtFee : 0),
+    delivery,
+    grand: subtotal + delivery,
     grams: anyGrams ? grams : null,
   }
+}
+
+/** Скидка по промокоду:0 — код не задан или не совпал. */
+export function promoDiscount(data: CatalogData, code: string, subtotal: number): number {
+  const promo = data.settings.promo
+  if (!promo?.code || !code.trim()) return 0
+  if (code.trim().toLowerCase() !== promo.code.toLowerCase()) return 0
+  return Math.min(subtotal, Math.round((subtotal * promo.percent) / 100))
 }

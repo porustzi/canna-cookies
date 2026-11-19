@@ -26,6 +26,14 @@ export function CategoriesEditor({ state, onSaved }: { state: AdminState; onSave
     setError(null)
   }
 
+  const move = (i: number, dir: -1 | 1) => {
+    const j = i + dir
+    if (j < 0 || j >= items.length) return
+    const next = [...items]
+    ;[next[i], next[j]] = [next[j], next[i]]
+    update(next)
+  }
+
   const save = async () => {
     const cleaned = items.map((c) => ({ id: c.id.trim(), name: c.name }))
     for (const c of cleaned) {
@@ -92,7 +100,23 @@ export function CategoriesEditor({ state, onSaved }: { state: AdminState; onSave
               onChange={(v) => update(items.map((x, idx) => (idx === i ? { ...x, name: v } : x)))}
               required
             />
-            <div className="flex items-end">
+            <div className="flex items-end gap-1.5">
+              <button
+                type="button"
+                onClick={() => move(i, -1)}
+                aria-label="Выше"
+                className="grid h-11 w-9 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={() => move(i, 1)}
+                aria-label="Ниже"
+                className="grid h-11 w-9 place-items-center rounded-xl border border-white/12 text-mist hover:border-aqua/50 hover:text-aqua"
+              >
+                ↓
+              </button>
               <button
                 type="button"
                 onClick={() => update(items.filter((_, idx) => idx !== i))}

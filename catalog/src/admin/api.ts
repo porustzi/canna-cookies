@@ -1,6 +1,54 @@
 import type { CatalogData, Category, District, FaqItem, L, Lang, Product, Settings } from '../types'
 
-export type AdminState = CatalogData & { kv: boolean }
+export type AdminCourier = {
+  id: string
+  name: string
+  chatId: string
+  active: boolean
+  createdAt: string
+  stats: { taken: number; done: number; declined: number; rating?: number }
+}
+
+export type AdminOrder = {
+  id: string
+  createdAt?: string
+  status: string
+  items: { productId?: string; name: string; weight: string; price: number; qty: number }[]
+  district?: { id?: string; name: string; fee: number }
+  address: string
+  name: string
+  phone: string
+  payment: string
+  comment?: string
+  lang?: string
+  total: number
+  delivery: number
+  discount?: number
+  promo?: string
+  grand: number
+  takenBy?: string
+  reviewed?: boolean
+}
+
+export type AdminFeedback = {
+  id: string
+  createdAt?: string
+  type: string
+  name: string
+  contact?: string
+  phone?: string
+  tg?: string
+  text: string
+  orderId?: string
+  reply?: string
+}
+
+export type AdminState = CatalogData & {
+  kv: boolean
+  orders: AdminOrder[]
+  feedback: AdminFeedback[]
+  couriers: AdminCourier[]
+}
 
 export const LANG_LABELS: { code: Lang; label: string }[] = [
   { code: 'ru', label: 'Русский' },
@@ -43,6 +91,19 @@ export const api = {
     }),
   deleteImage: (productId: string) =>
     req<{ ok: boolean }>(`/admin/api/product-image/${productId}`, { method: 'DELETE' }),
+  orderAction: (id: string, action: 'cancel' | 'notify' | 'delete') =>
+    req<{ ok: boolean }>('/admin/api/orders', { method: 'PUT', body: JSON.stringify({ id, action }) }),
+  replyFeedback: (id: string, orderId: string | undefined, text: string) =>
+    req<{ ok: boolean }>('/admin/api/feedback-reply', {
+      method: 'PUT',
+      body: JSON.stringify({ id, orderId, text }),
+    }),
+  courierAction: (body: { id?: string; action: 'toggle' | 'invite'; name?: string }) =>
+    req<{ ok: boolean; code?: string; link?: string }>('/admin/api/couriers', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  ordersCsvUrl: () => '/admin/api/orders.csv',
 }
 
 export async function fileToPayload(file: File): Promise<{ mime: string; data: string }> {

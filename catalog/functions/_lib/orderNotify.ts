@@ -23,6 +23,9 @@ export type OrderRecord = {
   adminAlerted?: boolean
   reviewed?: boolean
   reminders?: number
+  tgId?: string
+  discount?: number
+  promo?: string
 }
 
 const LANGS: Record<string, string> = { ru: 'русский', cs: 'чешский', en: 'английский' }
@@ -31,6 +34,7 @@ export const ORDER_STATUS_LABEL: Record<string, string> = {
   new: '🆕 Новый',
   taken: '🚴 Взят',
   done: '✅ Выполнен',
+  cancelled: '🚫 Отменён',
   confirmed: '✅ Подтверждён',
   declined: '❌ Отклонён',
 }
@@ -54,6 +58,8 @@ export function formatOrderCard(order: OrderRecord, opts: CardOpts = {}): string
     header = `🚴 Заказ взял ${opts.takenByName ?? 'курьер'} · ${order.id}`
   } else if (order.status === 'done') {
     header = `✅ Заказ выполнен · ${order.id}`
+  } else if (order.status === 'cancelled') {
+    header = `🚫 Заказ отменён · ${order.id}`
   } else if (opts.viewerDeclined) {
     header = `❌ Вы отклонили заказ ${order.id}`
   } else {
@@ -78,4 +84,39 @@ export function formatOrderCard(order: OrderRecord, opts: CardOpts = {}): string
   if (order.comment) lines.push(`Комментарий: ${order.comment}`)
   if (order.lang) lines.push(`Язык клиента: ${LANGS[order.lang] ?? order.lang}`)
   return lines.join('\n')
+}
+
+/** Санитизированная копия заказа для клиента: без имени/телефона/адреса. */
+export type PublicOrder = {
+  id: string
+  status: string
+  createdAt?: string
+  total: number
+  delivery: number
+  discount: number
+  grand: number
+  payment?: string
+  district?: { name: string; fee: number }
+  assigned: boolean
+  reviewed: boolean
+  reply?: string
+  items: { name: string; weight: string; price: number; qty: number }[]
+}
+
+export function publicOrder(order: OrderRecord, reply?: string): PublicOrder {
+  return {
+    id: order.id,
+    status: order.status,
+    createdAt: order.createdAt,
+    total: order.total,
+    delivery: order.delivery,
+    discount: order.discount ?? 0,
+    grand: order.grand,
+    payment: order.payment,
+    district: order.district ? { name: order.district.name, fee: order.district.fee } : undefined,
+    assigned: Boolean(order.takenBy),
+    reviewed: Boolean(order.reviewed),
+    reply: reply || undefined,
+    items: order.items.map((it) => ({ name: it.name, weight: it.weight, price: it.price, qty: it.qty })),
+  }
 }

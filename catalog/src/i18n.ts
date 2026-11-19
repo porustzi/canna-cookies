@@ -53,6 +53,7 @@ export type Dict = {
     delivery: string
     total: string
     minOrder: string
+    freeFrom: string
     checkout: string
     remove: string
   }
@@ -75,6 +76,9 @@ export type Dict = {
     privacy: string
     backToCart: string
     changeZone: string
+    promo: string
+    promoPh: string
+    promoBad: string
   }
   confirm: {
     title: string
@@ -107,6 +111,12 @@ export type Dict = {
     receiveConfirm: string
     received: string
     receiveErr: string
+    cancel: string
+    cancelConfirm: string
+    cancelErr: string
+    cancelTooLate: string
+    sCancelled: string
+    replyTitle: string
   }
   feedback: {
     title: string
@@ -127,6 +137,7 @@ export type Dict = {
     successText: string
     privacy: string
     ordered: string
+    contactsTitle: string
   }
   footer: {
     rights: string
@@ -186,6 +197,7 @@ const cs: Dict = {
     delivery: 'Doručení',
     total: 'Celkem',
     minOrder: 'Minimální objednávka je {n} Kč.',
+    freeFrom: 'Doprava zdarma od {n} Kč.',
     checkout: 'K objednávce',
     remove: 'Odebrat',
   },
@@ -208,6 +220,9 @@ const cs: Dict = {
     privacy: 'Telefon a adresu použijeme pouze k doručení objednávky.',
     backToCart: 'Zpět do košíku',
     changeZone: 'Změnit',
+    promo: 'Slevový kód',
+    promoPh: 'Zadejte kód',
+    promoBad: 'Kód neplatí.',
   },
   confirm: {
     title: 'Objednávka přijata',
@@ -240,6 +255,12 @@ const cs: Dict = {
     receiveConfirm: 'Potvrdit převzetí objednávky?',
     received: '✓ Objednávka převzata',
     receiveErr: 'Potvrzení se nepodařilo odeslat.',
+    cancel: 'Zrušit objednávku',
+    cancelConfirm: 'Opravdu zrušit objednávku?',
+    cancelErr: 'Objednávku se nepodařilo zrušit.',
+    cancelTooLate: 'Už ji nelze zrušit — kurýr ji převzal.',
+    sCancelled: 'zrušena',
+    replyTitle: 'Odpověď podpory',
   },
   feedback: {
     title: 'Zpětná vazba',
@@ -260,6 +281,7 @@ const cs: Dict = {
     successText: 'Ozveme se vám, jakmile to půjde.',
     privacy: 'Údaje použijeme jen k odpovědi na váš dotaz.',
     ordered: 'Objednávku jste již vytvořili — na dotazy pište kurýrovi nebo nám na Telegram.',
+    contactsTitle: 'Spojte se s námi',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",
@@ -319,6 +341,7 @@ const en: Dict = {
     delivery: 'Delivery',
     total: 'Total',
     minOrder: 'Minimum order is {n} Kč.',
+    freeFrom: 'Free delivery from {n} Kč.',
     checkout: 'Checkout',
     remove: 'Remove',
   },
@@ -341,6 +364,9 @@ const en: Dict = {
     privacy: 'We use your phone and address only to deliver the order.',
     backToCart: 'Back to cart',
     changeZone: 'Change',
+    promo: 'Promo code',
+    promoPh: 'Enter code',
+    promoBad: 'Invalid code.',
   },
   confirm: {
     title: 'Order received',
@@ -373,6 +399,12 @@ const en: Dict = {
     receiveConfirm: 'Confirm that you received the order?',
     received: '✓ Order received',
     receiveErr: 'Failed to send the confirmation.',
+    cancel: 'Cancel order',
+    cancelConfirm: 'Really cancel this order?',
+    cancelErr: 'Failed to cancel the order.',
+    cancelTooLate: 'Too late — the courier already took it.',
+    sCancelled: 'cancelled',
+    replyTitle: 'Support reply',
   },
   feedback: {
     title: 'Feedback',
@@ -393,6 +425,7 @@ const en: Dict = {
     successText: 'We will get back to you as soon as we can.',
     privacy: 'We only use your details to answer your message.',
     ordered: 'You already placed an order — message your courier or us on Telegram for questions.',
+    contactsTitle: 'Contact us',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",
@@ -452,6 +485,7 @@ const ru: Dict = {
     delivery: 'Доставка',
     total: 'Итого',
     minOrder: 'Минимальный заказ — {n} Kč.',
+    freeFrom: 'Бесплатная доставка от {n} Kč.',
     checkout: 'К заказу',
     remove: 'Убрать',
   },
@@ -474,6 +508,9 @@ const ru: Dict = {
     privacy: 'Телефон и адрес используем только для доставки заказа.',
     backToCart: 'В корзину',
     changeZone: 'Сменить',
+    promo: 'Промокод',
+    promoPh: 'Введите код',
+    promoBad: 'Код не сработал.',
   },
   confirm: {
     title: 'Заказ принят',
@@ -506,6 +543,12 @@ const ru: Dict = {
     receiveConfirm: 'Подтвердить, что заказ получен?',
     received: '✓ Заказ получен',
     receiveErr: 'Не удалось отправить подтверждение.',
+    cancel: 'Отменить заказ',
+    cancelConfirm: 'Отменить этот заказ?',
+    cancelErr: 'Не удалось отменить заказ.',
+    cancelTooLate: 'Уже поздно — курьер взял заказ.',
+    sCancelled: 'отменён',
+    replyTitle: 'Ответ поддержки',
   },
   feedback: {
     title: 'Обратная связь',
@@ -526,6 +569,7 @@ const ru: Dict = {
     successText: 'Ответим, как только сможем.',
     privacy: 'Данные используем только для ответа на ваше сообщение.',
     ordered: 'Вы уже делали заказ — по вопросам пишите курьеру или нам в Telegram.',
+    contactsTitle: 'Связаться с нами',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",

@@ -6,21 +6,27 @@ import { ProductsEditor } from './ProductsEditor'
 import { CategoriesEditor } from './CategoriesEditor'
 import { ZonesEditor } from './ZonesEditor'
 import { SettingsEditor } from './SettingsEditor'
+import { OrdersEditor } from './OrdersEditor'
+import { CouriersEditor } from './CouriersEditor'
+import { FeedbackEditor } from './FeedbackEditor'
 
-type Tab = 'faq' | 'products' | 'categories' | 'zones' | 'settings'
+type Tab = 'faq' | 'products' | 'categories' | 'zones' | 'settings' | 'orders' | 'couriers' | 'feedback'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'faq', label: 'FAQ' },
+  { id: 'orders', label: 'Заказы' },
+  { id: 'feedback', label: 'Обращения' },
+  { id: 'couriers', label: 'Курьеры' },
   { id: 'products', label: 'Товары' },
   { id: 'categories', label: 'Категории' },
   { id: 'zones', label: 'Зоны' },
   { id: 'settings', label: 'Настройки' },
+  { id: 'faq', label: 'FAQ' },
 ]
 
 export function AdminApp() {
   const [state, setState] = useState<AdminState | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('faq')
+  const [tab, setTab] = useState<Tab>('orders')
   const [toast, setToast] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -117,6 +123,12 @@ export function AdminApp() {
       <main className="mx-auto max-w-6xl px-4 pt-6 sm:px-5 sm:pt-8">
         {!state ? (
           <p className="py-20 text-center text-mist">Загрузка…</p>
+        ) : tab === 'orders' ? (
+          <OrdersEditor state={state} onSaved={onSaved} />
+        ) : tab === 'feedback' ? (
+          <FeedbackEditor state={state} onSaved={onSaved} />
+        ) : tab === 'couriers' ? (
+          <CouriersEditor state={state} onSaved={onSaved} />
         ) : tab === 'faq' ? (
           <FaqEditor state={state} onSaved={onSaved} />
         ) : tab === 'products' ? (

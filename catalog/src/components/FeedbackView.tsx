@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { useApp } from '../context'
 import { submitFeedback } from '../api'
+import { pick } from '../types'
 
 export function FeedbackView() {
-  const { t, go } = useApp()
+  const { t, go, data, lang } = useApp()
+
+  const contacts = data.settings.contacts
+  const hasContacts = Boolean(contacts && (contacts.phone || contacts.tg || contacts.address))
+  const privacyText = pick(data.settings.texts?.privacy, lang) || t.feedback.privacy
 
   const [type, setType] = useState<'question' | 'complaint'>('question')
   const [name, setName] = useState('')
@@ -61,6 +66,28 @@ export function FeedbackView() {
     <div className="flex flex-col gap-4">
       <h1 className="text-[clamp(1.4rem,6vw,1.9rem)]">{t.feedback.title}</h1>
       <p className="text-[14.5px] leading-relaxed text-mist">{t.feedback.lead}</p>
+
+      {hasContacts && (
+        <div className="cc-card flex flex-col gap-1.5 p-5">
+          <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.feedback.contactsTitle}</span>
+          {contacts?.phone && (
+            <a href={`tel:${contacts.phone.replace(/\s+/g, '')}`} className="text-[15px] text-aqua hover:underline">
+              📞 {contacts.phone}
+            </a>
+          )}
+          {contacts?.tg && (
+            <a
+              href={contacts.tg.startsWith('@') ? `https://t.me/${contacts.tg.slice(1)}` : `https://t.me/${contacts.tg}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[15px] text-aqua hover:underline"
+            >
+              ✈️ {contacts.tg.startsWith('@') ? contacts.tg : `@${contacts.tg}`}
+            </a>
+          )}
+          {contacts?.address && <p className="text-[14.5px] text-mist">📍 {contacts.address}</p>}
+        </div>
+      )}
 
       <div className="cc-card flex flex-col gap-4 p-5">
         <div>
@@ -138,7 +165,7 @@ export function FeedbackView() {
 
         {error && <p className="text-[13.5px] text-[#FFD28F]">{error}</p>}
 
-        <p className="text-[12.5px] leading-relaxed text-mist/60">{t.feedback.privacy}</p>
+        <p className="text-[12.5px] leading-relaxed text-mist/60">{privacyText}</p>
 
         <button
           type="button"
