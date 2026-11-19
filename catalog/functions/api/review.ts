@@ -66,7 +66,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   }
 
   await clearFailures(env, 'review', ip)
-  await markCooldown(env, 'review', ip, 3600)
+  await markCooldown(env, 'review', ip, 60)
 
   return json({ ok: true })
 }

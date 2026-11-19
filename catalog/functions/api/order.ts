@@ -120,7 +120,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
-  await markCooldown(env, 'order', ip, 3600)
+  await markCooldown(env, 'order', ip, 60)
   // это устройство сделало заказ — с него больше не принимаем «вопросы»
   try {
     await env.CATALOG?.put(`iporder:${ip}`, String(Date.now()), { expirationTtl: TTL })

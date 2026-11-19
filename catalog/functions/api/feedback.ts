@@ -85,7 +85,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
 
   await putJson(env, `fb:${id}`, feedback, TTL)
   await clearFailures(env, 'fb', ip)
-  await markCooldown(env, 'fb', ip, 3600)
+  await markCooldown(env, 'fb', ip, 60)
   await sendFeedbackToTelegram(env, { id, type, name, contact, text })
 
   return json({ ok: true })
