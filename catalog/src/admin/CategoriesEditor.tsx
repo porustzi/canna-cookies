@@ -5,6 +5,17 @@ import type { Category } from '../types'
 
 const SLUG = /^[a-z0-9][a-z0-9-]{0,59}$/
 
+function slugFromName(name: { ru: string; cs: string; en: string }): string {
+  const src = name.ru || name.cs || name.en || ''
+  return src
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
 function clone(items: Category[]): Category[] {
   return items.map((c) => ({ id: c.id, name: { ...c.name } }))
 }
@@ -35,10 +46,10 @@ export function CategoriesEditor({ state, onSaved }: { state: AdminState; onSave
   }
 
   const save = async () => {
-    const cleaned = items.map((c) => ({ id: c.id.trim(), name: c.name }))
+    const cleaned = items.map((c) => ({ id: c.id.trim() || slugFromName(c.name), name: c.name }))
     for (const c of cleaned) {
       if (!SLUG.test(c.id)) {
-        setError(`Некорректный ID «${c.id}»: строчные буквы, цифры и дефис.`)
+        setError(`Некорректный ID «${c.id}»: строчные буквы, цифры и дефис. Оставьте ID пустым и напишите название латиницей.`)
         return
       }
       if (!c.name.ru && !c.name.cs && !c.name.en) {
@@ -71,7 +82,9 @@ export function CategoriesEditor({ state, onSaved }: { state: AdminState; onSave
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <p className="text-[13.5px] leading-relaxed text-mist/70">Название категории — на всех трёх языках. ID не меняется.</p>
+        <p className="text-[13.5px] leading-relaxed text-mist/70">
+          Название — на всех трёх языках. ID можно оставить пустым — создастся из названия.
+        </p>
         <div className="flex flex-wrap items-center gap-3">
           {error && <span className="max-w-[340px] text-[12.5px] text-[#FF9D9D]">{error}</span>}
           <button
@@ -89,7 +102,7 @@ export function CategoriesEditor({ state, onSaved }: { state: AdminState; onSave
         {items.map((c, i) => (
           <div key={i} className="cc-card grid gap-4 p-4 sm:p-5 md:grid-cols-[200px_1fr_auto]">
             <Field
-              label="ID"
+              label="ID (пусто — из названия)"
               value={c.id}
               onChange={(v) => update(items.map((x, idx) => (idx === i ? { ...x, id: v } : x)))}
               placeholder="flowers"

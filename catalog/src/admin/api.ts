@@ -94,11 +94,8 @@ export const api = {
     req<{ ok: boolean }>(`/admin/api/product-image/${productId}`, { method: 'DELETE' }),
   orderAction: (id: string, action: 'cancel' | 'notify' | 'delete') =>
     req<{ ok: boolean }>('/admin/api/orders', { method: 'PUT', body: JSON.stringify({ id, action }) }),
-  replyFeedback: (id: string, orderId: string | undefined, text: string) =>
-    req<{ ok: boolean }>('/admin/api/feedback-reply', {
-      method: 'PUT',
-      body: JSON.stringify({ id, orderId, text }),
-    }),
+  deleteFeedback: (id: string) =>
+    req<{ ok: boolean }>('/admin/api/feedback', { method: 'PUT', body: JSON.stringify({ id, action: 'delete' }) }),
   courierAction: (body: { id?: string; action: 'toggle' | 'invite'; name?: string }) =>
     req<{ ok: boolean; code?: string; link?: string }>('/admin/api/couriers', {
       method: 'PUT',

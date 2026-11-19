@@ -155,20 +155,16 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
       })
     }
 
-    if (path === 'feedback-reply' && method === 'PUT') {
-      const body = (await readJsonBody(request)) as { id?: unknown; orderId?: unknown; text?: unknown } | null
+    if (path === 'feedback' && method === 'PUT') {
+      const body = (await readJsonBody(request)) as { id?: unknown; action?: unknown } | null
       const id = typeof body?.id === 'string' ? body.id.trim() : ''
-      const text = typeof body?.text === 'string' ? body.text.trim().slice(0, 3000) : ''
-      const orderId = typeof body?.orderId === 'string' ? body.orderId.trim().toUpperCase() : ''
-      if (!/^FB-[A-Z0-9]{4,30}$/i.test(id) || text.length < 1) return json({ error: 'bad-payload' }, 400)
+      const action = typeof body?.action === 'string' ? body.action : ''
+      if (!/^FB-[A-Z0-9]{4,30}$/i.test(id) || action !== 'delete') return json({ error: 'bad-payload' }, 400)
       const key = `fb:${id.toUpperCase()}`
-      const record = (await readJson<Record<string, unknown> | null>(env, key, null)) as Record<string, unknown> | null
-      if (!record) return json({ error: 'not-found' }, 404)
-      record.reply = text
-      record.repliedAt = new Date().toISOString()
-      await putJson(env, key, record, ORDER_TTL)
-      if (/^CC-[A-Z0-9]{4,24}$/i.test(orderId)) {
-        await putJson(env, `disputereply:${orderId.toUpperCase()}`, { text, at: record.repliedAt }, ORDER_TTL)
+      const record = (await readJson<{ orderId?: string } | null>(env, key, null)) as { orderId?: string } | null
+      await store.delete(key)
+      if (record?.orderId && /^CC-[A-Z0-9]{4,24}$/i.test(record.orderId)) {
+        await store.delete(`disputereply:${record.orderId.toUpperCase()}`)
       }
       return json({ ok: true })
     }

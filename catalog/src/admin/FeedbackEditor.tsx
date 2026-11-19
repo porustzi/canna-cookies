@@ -16,21 +16,18 @@ function fmt(iso?: string): string {
 }
 
 export function FeedbackEditor({ state, onSaved }: { state: AdminState; onSaved: (msg: string) => void }) {
-  const [replyFor, setReplyFor] = useState<string | null>(null)
-  const [text, setText] = useState('')
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
 
-  const send = async (item: AdminFeedback) => {
-    const body = text.trim()
-    if (!body) return
-    setBusy(true)
+  const remove = async (item: AdminFeedback) => {
+    if (!window.confirm(`Удалить обращение ${item.id}?`)) return
+    setBusy(item.id)
     try {
-      await api.replyFeedback(item.id, item.orderId, body)
-      onSaved(item.orderId ? `Ответ отправлен (заказ ${item.orderId})` : 'Ответ сохранён')
+      await api.deleteFeedback(item.id)
+      onSaved('Обращение удалено')
     } catch (e) {
       onSaved(e instanceof Error ? e.message : 'Ошибка')
     } finally {
-      setBusy(false)
+      setBusy(null)
     }
   }
 
@@ -38,9 +35,7 @@ export function FeedbackEditor({ state, onSaved }: { state: AdminState; onSaved:
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[13.5px] leading-relaxed text-mist/70">
-        Вопросы, жалобы и споры. Ответ по спору увидит клиент в приложении (Мои заказы → Ответ поддержки).
-      </p>
+      <p className="text-[13.5px] leading-relaxed text-mist/70">Вопросы, жалобы и споры клиентов. Просмотр и удаление.</p>
       {items.length === 0 && <div className="cc-card p-6 text-center text-mist">Обращений пока нет.</div>}
       {items.map((item) => (
         <div key={item.id} className="cc-card flex flex-col gap-2.5 p-4">
@@ -63,46 +58,16 @@ export function FeedbackEditor({ state, onSaved }: { state: AdminState; onSaved:
           </p>
           <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-snow">{item.text}</p>
 
-          {item.reply ? (
-            <div className="rounded-xl border border-aqua/40 bg-aqua/[0.07] p-3">
-              <p className="font-display text-[11px] uppercase tracking-[0.16em] text-aqua">✓ Ответ отправлен</p>
-              <p className="mt-1 whitespace-pre-wrap text-[13.5px] text-snow">{item.reply}</p>
-            </div>
-          ) : replyFor === item.id ? (
-            <div className="flex flex-col gap-2">
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Ответ клиенту…"
-                rows={3}
-                className="w-full resize-none rounded-xl border border-white/12 bg-graphite px-4 py-3 text-[14.5px] leading-relaxed text-snow placeholder:text-mist/40 outline-none focus:border-aqua/60"
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={busy || !text.trim()}
-                  onClick={() => void send(item)}
-                  className="cc-btn-primary px-5 py-2.5 text-[11.5px] disabled:opacity-50"
-                >
-                  {busy ? '…' : 'Отправить ответ'}
-                </button>
-                <button type="button" onClick={() => setReplyFor(null)} className="cc-btn-ghost px-4 py-2.5 text-[11px]">
-                  Отмена
-                </button>
-              </div>
-            </div>
-          ) : (
+          <div>
             <button
               type="button"
-              onClick={() => {
-                setReplyFor(item.id)
-                setText('')
-              }}
-              className="cc-btn-ghost self-start px-4 py-2 text-[11px]"
+              disabled={busy === item.id}
+              onClick={() => void remove(item)}
+              className="cc-btn-ghost px-4 py-2 text-[11px] hover:border-[rgba(255,90,90,0.5)] hover:text-[#FF9D9D]"
             >
-              ↩ Ответить
+              🗑 Удалить
             </button>
-          )}
+          </div>
         </div>
       ))}
     </div>
