@@ -217,7 +217,7 @@ const cs: Dict = {
     lead: 'Jsme na příjmu. Kontaktní údaje doplníme spolu s finálním designem.',
     cards: [
       { label: 'E-mail', value: '—', status: 'Ve fázi 2' },
-      { label: 'Telegram', value: '@cannacookies_bot', status: 'Aktivní', href: 'https://t.me/cannacookies_bot' },
+      { label: 'Telegram', value: '@cookies_catalog_bot', status: 'Aktivní', href: 'https://t.me/cookies_catalog_bot' },
       { label: 'Instagram', value: '—', status: 'Ve fázi 2' },
       { label: 'Sídlo', value: 'Česká republika', status: 'Adresa ve fázi 2' },
     ],
@@ -371,7 +371,7 @@ const en: Dict = {
     lead: 'We are reachable. Contact details will be added together with the final design.',
     cards: [
       { label: 'E-mail', value: '—', status: 'Stage 2' },
-      { label: 'Telegram', value: '@cannacookies_bot', status: 'Live', href: 'https://t.me/cannacookies_bot' },
+      { label: 'Telegram', value: '@cookies_catalog_bot', status: 'Live', href: 'https://t.me/cookies_catalog_bot' },
       { label: 'Instagram', value: '—', status: 'Stage 2' },
       { label: 'HQ', value: 'Czech Republic', status: 'Address in stage 2' },
     ],
@@ -525,7 +525,7 @@ const ru: Dict = {
     lead: 'Мы на связи. Контактные данные добавим вместе с финальным дизайном.',
     cards: [
       { label: 'E-mail', value: '—', status: '2-й этап' },
-      { label: 'Telegram', value: '@cannacookies_bot', status: 'Открыт', href: 'https://t.me/cannacookies_bot' },
+      { label: 'Telegram', value: '@cookies_catalog_bot', status: 'Открыт', href: 'https://t.me/cookies_catalog_bot' },
       { label: 'Instagram', value: '—', status: '2-й этап' },
       { label: 'Офис', value: 'Чехия', status: 'Адрес на 2-м этапе' },
     ],
