@@ -21,6 +21,7 @@ fs.mkdirSync(OUT, { recursive: true })
 
 // каждый прогон — свой «устройство» (IP), чтобы кулдаун 1/час не ломал повторные прогоны
 const FAKE_IP = `10.${Math.floor(Math.random() * 200) + 20}.${Math.floor(Math.random() * 250) + 1}.${Math.floor(Math.random() * 250) + 1}`
+const FAKE_IP2 = `10.${Math.floor(Math.random() * 200) + 20}.${Math.floor(Math.random() * 250) + 1}.${Math.floor(Math.random() * 250) + 1}`
 
 async function http(path, opts = {}) {
   const res = await fetch(BASE + path, {
@@ -56,7 +57,11 @@ await page.addInitScript(() => {
 })
 const errors = []
 page.on('console', (m) => {
-  if (m.type() === 'error') errors.push(m.text())
+  if (m.type() === 'error') {
+    // ожидаемый 403: вопрос с устройства, уже сделавшего заказ (проверяем блок)
+    if (m.text().includes('Failed to load resource') && m.text().includes('403')) return
+    errors.push(m.text())
+  }
 })
 page.on('pageerror', (e) => errors.push(String(e)))
 
@@ -144,11 +149,19 @@ await page.screenshot({ path: `${OUT}/c8-faq.png` })
 await page.click('nav button:has-text("Контакт")')
 await page.waitForSelector('text=Обратная связь', { timeout: 5000 })
 await page.fill('input[placeholder="Ваше имя"]', 'Anna')
+await page.fill('input[placeholder="+420 … (необязательно)"]', '+420777888999')
+await page.fill('input[placeholder="@username (необязательно)"]', 'anna_tg')
 await page.fill('textarea[placeholder="Напишите, что произошло…"]', 'Dobry den, zajima me doprava do Prahy 5.')
 await page.screenshot({ path: `${OUT}/c9-feedback.png` })
+// вопрос с устройства, которое уже делало заказ — блок
+await page.click('button:has-text("Отправить")')
+await page.waitForSelector('text=Вы уже делали заказ', { timeout: 5000 })
+ok(true, 'question blocked after order')
+// жалоба с того же устройства — проходит
+await page.click('button:has-text("Жалоба")')
 await page.click('button:has-text("Отправить")')
 await page.waitForSelector('text=Спасибо за сообщение!', { timeout: 5000 })
-ok(true, 'feedback submitted')
+ok(true, 'feedback submitted as complaint')
 
 // zone chip opens gate
 await page.click('header button:has-text("Зона A")')
@@ -216,15 +229,29 @@ ok(r.status === 400, 'invalid order -> 400', `got ${r.status}`)
 
 r = await http('/api/feedback', {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP },
   body: JSON.stringify({ type: 'question', name: 'Anna', text: 'Dobry den, zajima me doprava do Prahy 5.', website: '' }),
 })
-// 200 — первый заход; 429 — кулдаун 1/час с этого же IP после прошлого прогона
-ok(r.status === 200 || r.status === 429, 'feedback api responds', `got ${r.status}`)
+ok(r.status === 403 && r.text.includes('already-ordered'), 'question after order -> 403', `got ${r.status} ${r.text.slice(0, 80)}`)
 
 r = await http('/api/feedback', {
   method: 'POST',
-  headers: { 'content-type': 'application/json' },
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP },
+  body: JSON.stringify({ type: 'complaint', name: 'Anna', phone: '+420777888999', tg: 'anna_tg', text: 'Problem s objednavkou, prosim o kontakt.', website: '' }),
+})
+// 200 — первый заход; 429 — кулдаун 1/час с этого же IP после прошлого прогона
+ok(r.status === 200 || r.status === 429, 'complaint after order allowed', `got ${r.status}`)
+
+r = await http('/api/feedback', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP2 },
+  body: JSON.stringify({ type: 'question', name: 'Petr', text: 'Dobry den, mám dotaz k doprave.', website: '' }),
+})
+ok(r.status === 200 || r.status === 429, 'question from fresh device allowed', `got ${r.status}`)
+
+r = await http('/api/feedback', {
+  method: 'POST',
+  headers: { 'content-type': 'application/json', 'cf-connecting-ip': FAKE_IP2 },
   body: JSON.stringify({ type: 'question', name: 'тест123', text: 'test test', website: '' }),
 })
 ok(r.status === 200, 'garbage feedback silently ignored', `got ${r.status}`)

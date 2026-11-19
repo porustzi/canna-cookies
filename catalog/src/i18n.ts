@@ -93,14 +93,17 @@ export type Dict = {
     complaint: string
     name: string
     namePh: string
-    contact: string
-    contactPh: string
+    phone: string
+    phonePh: string
+    tg: string
+    tgPh: string
     text: string
     textPh: string
     submit: string
     success: string
     successText: string
     privacy: string
+    ordered: string
   }
   footer: {
     rights: string
@@ -200,14 +203,17 @@ const cs: Dict = {
     complaint: 'Stížnost',
     name: 'Jméno',
     namePh: 'Vaše jméno',
-    contact: 'Kontakt',
-    contactPh: 'Telegram nebo telefon (volitelné)',
+    phone: 'Telefon',
+    phonePh: '+420 … (volitelné)',
+    tg: 'Telegram',
+    tgPh: '@username (volitelné)',
     text: 'Zpráva',
     textPh: 'Napište, co se stalo…',
     submit: 'Odeslat',
     success: 'Díky za zprávu!',
     successText: 'Ozveme se vám, jakmile to půjde.',
     privacy: 'Údaje použijeme jen k odpovědi na váš dotaz.',
+    ordered: 'Objednávku jste již vytvořili — na dotazy pište kurýrovi nebo nám na Telegram.',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",
@@ -307,14 +313,17 @@ const en: Dict = {
     complaint: 'Complaint',
     name: 'Name',
     namePh: 'Your name',
-    contact: 'Contact',
-    contactPh: 'Telegram or phone (optional)',
+    phone: 'Phone',
+    phonePh: '+420 … (optional)',
+    tg: 'Telegram',
+    tgPh: '@username (optional)',
     text: 'Message',
     textPh: 'Tell us what happened…',
     submit: 'Send',
     success: 'Thanks for your message!',
     successText: 'We will get back to you as soon as we can.',
     privacy: 'We only use your details to answer your message.',
+    ordered: 'You already placed an order — message your courier or us on Telegram for questions.',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",
@@ -414,14 +423,17 @@ const ru: Dict = {
     complaint: 'Жалоба',
     name: 'Имя',
     namePh: 'Ваше имя',
-    contact: 'Контакт',
-    contactPh: 'Telegram или телефон (необязательно)',
+    phone: 'Телефон',
+    phonePh: '+420 … (необязательно)',
+    tg: 'Telegram',
+    tgPh: '@username (необязательно)',
     text: 'Сообщение',
     textPh: 'Напишите, что произошло…',
     submit: 'Отправить',
     success: 'Спасибо за сообщение!',
     successText: 'Ответим, как только сможем.',
     privacy: 'Данные используем только для ответа на ваше сообщение.',
+    ordered: 'Вы уже делали заказ — по вопросам пишите курьеру или нам в Telegram.',
   },
   footer: {
     rights: "DON'T PANIC, IT'S ORGANIC · 21+",

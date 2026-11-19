@@ -121,6 +121,12 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   await putJson(env, `order:${id}`, order, TTL)
   await clearFailures(env, 'order', ip)
   await markCooldown(env, 'order', ip, 3600)
+  // это устройство сделало заказ — с него больше не принимаем «вопросы»
+  try {
+    await env.CATALOG?.put(`iporder:${ip}`, String(Date.now()), { expirationTtl: TTL })
+  } catch {
+    /* KV недоступен — маркер не ставим */
+  }
   await broadcastNewOrder(env, order)
 
   return json({ ok: true, id, grand })

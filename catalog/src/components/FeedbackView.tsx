@@ -7,7 +7,8 @@ export function FeedbackView() {
 
   const [type, setType] = useState<'question' | 'complaint'>('question')
   const [name, setName] = useState('')
-  const [contact, setContact] = useState('')
+  const [phone, setPhone] = useState('')
+  const [tg, setTg] = useState('')
   const [text, setText] = useState('')
   const [website, setWebsite] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -22,11 +23,20 @@ export function FeedbackView() {
     }
     setBusy(true)
     try {
-      await submitFeedback({ type, name: name.trim(), contact: contact.trim(), text: text.trim(), website })
+      await submitFeedback({
+        type,
+        name: name.trim(),
+        phone: phone.trim(),
+        tg: tg.trim(),
+        text: text.trim(),
+        website,
+      })
       setSent(true)
     } catch (e) {
       const msg = e instanceof Error ? e.message : ''
-      setError(msg === 'rate-limited' ? t.rateLimit : t.error)
+      setError(
+        msg === 'rate-limited' ? t.rateLimit : msg === 'already-ordered' ? t.feedback.ordered : t.error,
+      )
     } finally {
       setBusy(false)
     }
@@ -84,11 +94,23 @@ export function FeedbackView() {
         </label>
 
         <label className="block">
-          <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.feedback.contact}</span>
+          <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.feedback.phone}</span>
           <input
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            placeholder={t.feedback.contactPh}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder={t.feedback.phonePh}
+            inputMode="tel"
+            className="mt-2 w-full rounded-xl border border-white/12 bg-graphite px-4 py-3.5 text-[15px] text-snow placeholder:text-mist/40 outline-none focus:border-aqua/60"
+          />
+        </label>
+
+        <label className="block">
+          <span className="font-display text-[11px] uppercase tracking-[0.2em] text-mist/70">{t.feedback.tg}</span>
+          <input
+            value={tg}
+            onChange={(e) => setTg(e.target.value)}
+            placeholder={t.feedback.tgPh}
+            autoCapitalize="none"
             className="mt-2 w-full rounded-xl border border-white/12 bg-graphite px-4 py-3.5 text-[15px] text-snow placeholder:text-mist/40 outline-none focus:border-aqua/60"
           />
         </label>

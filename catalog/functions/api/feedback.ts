@@ -6,6 +6,8 @@ import { sendFeedbackToTelegram } from '../_lib/telegram'
 type RawFeedback = {
   type?: unknown
   name?: unknown
+  phone?: unknown
+  tg?: unknown
   contact?: unknown
   text?: unknown
   website?: unknown
@@ -37,7 +39,11 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const type = body.type === 'complaint' ? 'complaint' : body.type === 'question' ? 'question' : null
   const name = str(body.name, 100)
   const text = str(body.text, 3000)
-  const contact = typeof body.contact === 'string' ? body.contact.slice(0, 120) : ''
+  const phone = typeof body.phone === 'string' ? body.phone.slice(0, 40).trim() : ''
+  const tg = typeof body.tg === 'string' ? body.tg.slice(0, 64).trim().replace(/^@+/, '') : ''
+  // старый одиночный контакт поддерживаем как запасной вариант
+  const legacyContact = typeof body.contact === 'string' ? body.contact.slice(0, 120).trim() : ''
+  const contact = [phone ? `тел. ${phone}` : '', tg ? `@${tg}` : '', legacyContact].filter(Boolean).join(' · ')
 
   // мусор («тест», «123», клавиатурный шум) — молча отбрасываем
   if (isGarbage(name, text)) {
@@ -47,6 +53,16 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   if (!type || !name || name.length < 2 || !text || text.length < 5) {
     await recordFailure(env, 'fb', ip)
     return json({ error: 'bad-payload' }, 400)
+  }
+
+  // с этого устройства уже был заказ — вопрос не принимаем (жалобы можно)
+  if (type === 'question') {
+    try {
+      const ordered = await env.CATALOG?.get(`iporder:${ip}`)
+      if (ordered) return json({ error: 'already-ordered' }, 403)
+    } catch {
+      /* KV недоступен — не блокируем */
+    }
   }
 
   // 1 обращение в час с устройства — только после успешной валидации
@@ -61,6 +77,8 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     createdAt: new Date().toISOString(),
     type,
     name,
+    phone,
+    tg,
     contact,
     text,
   }

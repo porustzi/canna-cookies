@@ -30,7 +30,8 @@ export function submitOrder(payload: OrderPayload): Promise<{ ok: boolean; id: s
 export function submitFeedback(payload: {
   type: string
   name: string
-  contact: string
+  phone: string
+  tg: string
   text: string
   website: string
 }): Promise<{ ok: boolean }> {
