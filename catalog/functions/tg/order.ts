@@ -1,6 +1,6 @@
 import type { Env } from '../_lib/kv'
 import { putJson, readJson } from '../_lib/kv'
-import { formatOrderCard, ORDER_STATUS_LABEL, orderKeyboard, type OrderRecord } from '../_lib/orderNotify'
+import { formatOrderCard, ORDER_STATUS_LABEL, type OrderRecord } from '../_lib/orderNotify'
 
 type CallbackQuery = {
   id: string
