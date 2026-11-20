@@ -201,11 +201,12 @@ async function handleMessage(env: Env, msg: IncomingMessage, token: string): Pro
       await tg(token, 'sendMessage', { chat_id: chatId, text: 'Использование: /courier <имя>' })
       return
     }
-    const code = await createInvite(env, arg)
-    await tg(token, 'sendMessage', {
-      chat_id: chatId,
-      text: `Инвайт для «${arg}»:\n${code}\n\nСсылка:\nhttps://t.me/cookies_orders_bot?start=${code}`,
-    })
+      const code = await createInvite(env, arg)
+      const bot = env.TELEGRAM_ORDER_BOT_USERNAME || 'cookies_orders_bot'
+      await tg(token, 'sendMessage', {
+        chat_id: chatId,
+        text: `Инвайт для «${arg}»:\n${code}\n\nСсылка:\nhttps://t.me/${bot}?start=${code}`,
+      })
     return
   }
 

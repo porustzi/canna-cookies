@@ -13,6 +13,7 @@ export type Env = {
   TELEGRAM_ORDER_TOKEN?: string
   TELEGRAM_ORDER_CHAT_ID?: string
   TELEGRAM_ORDER_WEBHOOK_SECRET?: string
+  TELEGRAM_ORDER_BOT_USERNAME?: string
 }
 
 export function kv(env: Env): KvNamespace | null {

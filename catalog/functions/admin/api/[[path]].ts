@@ -176,7 +176,8 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
         const name = typeof body?.name === 'string' ? body.name.trim().slice(0, 60) : ''
         if (name.length < 2) return json({ error: 'bad-payload' }, 400)
         const code = await createInvite(env, name)
-        return json({ ok: true, code, link: `https://t.me/cookies_orders_bot?start=${code}` })
+        const bot = env.TELEGRAM_ORDER_BOT_USERNAME || 'cookies_orders_bot'
+        return json({ ok: true, code, link: `https://t.me/${bot}?start=${code}` })
       }
       const id = typeof body?.id === 'string' ? body.id.trim() : ''
       if (!id || !['toggle'].includes(action)) return json({ error: 'bad-payload' }, 400)
