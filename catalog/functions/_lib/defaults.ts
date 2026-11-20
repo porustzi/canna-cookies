@@ -191,7 +191,7 @@ export const DEFAULT_CATALOG: DefaultCatalog = {
       { cs: 'Krypto', en: 'Crypto', ru: 'Криптовалюта' },
     ],
     minOrder: 300,
-    hours: { cs: 'Po–So 10:00–20:00', en: 'Mon–Sat 10:00–20:00', ru: 'Пн–Сб 10:00–20:00' },
+    hours: { cs: 'Denně 9:00–22:00', en: 'Daily 9:00–22:00', ru: 'Ежедневно 9:00–22:00' },
     closed: false,
     banner: { cs: '', en: '', ru: '' },
   },
