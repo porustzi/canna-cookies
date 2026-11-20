@@ -20,6 +20,7 @@ export async function onRequestGet(context: { params: { id?: string }; env: Env 
     return json({ error: 'corrupt' }, 500)
   }
   if (typeof rec.mime !== 'string' || typeof rec.data !== 'string') return json({ error: 'corrupt' }, 500)
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(rec.mime)) return json({ error: 'corrupt' }, 500)
 
   let bytes: Uint8Array
   try {

@@ -8,6 +8,7 @@ export type TgUser = {
 type TgWebApp = {
   ready(): void
   expand(): void
+  initData?: string
   initDataUnsafe?: { user?: TgUser }
 }
 
@@ -23,6 +24,15 @@ export function tg(): TgWebApp | null {
 
 export function tgUser(): TgUser | null {
   return tg()?.initDataUnsafe?.user ?? null
+}
+
+/** Сырой подписанный initData из Telegram (пустая строка вне TMA). */
+export function tgInitData(): string {
+  try {
+    return tg()?.initData ?? ''
+  } catch {
+    return ''
+  }
 }
 
 export function tgInit(): void {

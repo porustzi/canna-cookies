@@ -1,4 +1,11 @@
 import type { CatalogData, OrderPayload } from './types'
+import { tgInitData } from './telegram'
+
+/** Заголовок с подписанным Telegram initData — сервер проверяет HMAC. */
+function tgHeaders(): Record<string, string> {
+  const data = tgInitData()
+  return data ? { 'x-telegram-init-data': data } : {}
+}
 
 async function req<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, init)
@@ -22,7 +29,7 @@ export function getCatalog(): Promise<CatalogData> {
 export function submitOrder(payload: OrderPayload): Promise<{ ok: boolean; id: string; grand: number }> {
   return req('/api/order', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...tgHeaders() },
     body: JSON.stringify(payload),
   })
 }
@@ -37,7 +44,7 @@ export function submitFeedback(payload: {
 }): Promise<{ ok: boolean }> {
   return req('/api/feedback', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...tgHeaders() },
     body: JSON.stringify(payload),
   })
 }
@@ -63,7 +70,9 @@ export function getOrder(id: string): Promise<OrderInfo> {
 }
 
 export function myOrders(tgId: string): Promise<OrderInfo[]> {
-  return req<{ orders: OrderInfo[] }>(`/api/myorders?tg=${encodeURIComponent(tgId)}`).then((r) => r.orders)
+  return req<{ orders: OrderInfo[] }>(`/api/myorders?tg=${encodeURIComponent(tgId)}`, {
+    headers: { ...tgHeaders() },
+  }).then((r) => r.orders)
 }
 
 export function cancelOrder(orderId: string): Promise<{ ok: boolean }> {

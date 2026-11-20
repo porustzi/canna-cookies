@@ -68,6 +68,11 @@ export function loginPage(opts: { error?: string; status?: number; retryAfter?: 
     'content-type': 'text/html; charset=utf-8',
     'cache-control': 'no-store',
     'x-robots-tag': 'noindex, nofollow',
+    'x-content-type-options': 'nosniff',
+    'x-frame-options': 'DENY',
+    'referrer-policy': 'no-referrer',
+    'content-security-policy':
+      "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; form-action 'self'; frame-ancestors 'none'",
   }
   if (retryAfter) headers['retry-after'] = String(retryAfter)
   return new Response(html, { status, headers })

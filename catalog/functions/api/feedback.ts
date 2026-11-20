@@ -1,6 +1,7 @@
 import { clientIp, json, putJson, readBody, str, type Env } from '../_lib/kv'
 import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFailure } from '../_lib/ratelimit'
 import { isGarbage } from '../_lib/garbage'
+import { verifyInitData } from '../_lib/initData'
 import { sendFeedbackToTelegram } from '../_lib/telegram'
 
 type RawFeedback = {
@@ -40,7 +41,10 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const name = str(body.name, 100)
   const text = str(body.text, 3000)
   const phone = typeof body.phone === 'string' ? body.phone.slice(0, 40).trim() : ''
-  const tgRaw = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  const tgRawClient = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  // username из подписанного Telegram initData важнее того, что прислал клиент
+  const verified = await verifyInitData(request.headers.get('x-telegram-init-data') ?? '', env.TELEGRAM_WEBAPP_TOKEN ?? '')
+  const tgRaw = verified.ok && verified.username ? verified.username : tgRawClient
   const tg = tgRaw ? `@${tgRaw}` : ''
   // старый одиночный контакт поддерживаем как запасной вариант
   const legacyContact = typeof body.contact === 'string' ? body.contact.slice(0, 120).trim() : ''

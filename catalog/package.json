@@ -12,7 +12,8 @@
     "e2e": "node scripts/e2e.mjs",
     "admin-e2e": "node scripts/admin-e2e.mjs",
     "test:order": "node scripts/order-bot-test.mjs",
-    "test:courier": "node scripts/courier-test.mjs"
+    "test:courier": "node scripts/courier-test.mjs",
+    "test:security": "node scripts/security-test.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",

@@ -4,6 +4,7 @@ import { clearFailures, cooldownRemaining, isRateLimited, markCooldown, recordFa
 import { isGarbage } from '../_lib/garbage'
 import { broadcastNewOrder } from '../_lib/couriers'
 import { isOpenBySchedule } from '../_lib/schedule'
+import { verifyInitData } from '../_lib/initData'
 import type { OrderRecord } from '../_lib/orderNotify'
 
 type RawLine = { productId?: unknown; weight?: unknown; qty?: unknown }
@@ -28,7 +29,7 @@ const IPORDER_TTL = 172800 // маркер «устройство заказыв
 
 function orderId(): string {
   const time = Date.now().toString(36).toUpperCase()
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase()
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase()
   return `CC-${time}${rand}`
 }
 
@@ -60,8 +61,12 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const payment = typeof body.payment === 'string' ? body.payment.slice(0, 100) : ''
   const comment = typeof body.comment === 'string' ? body.comment.slice(0, 1000) : ''
   const lang = parseLang(body.lang) ?? 'cs'
-  const tgId = typeof body.tgId === 'string' && /^\d{1,20}$/.test(body.tgId) ? body.tgId : undefined
-  const tgRaw = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  // id клиента — только из подписанного Telegram initData (если открыт в TMA)
+  const initData = request.headers.get('x-telegram-init-data') ?? ''
+  const verified = await verifyInitData(initData, env.TELEGRAM_WEBAPP_TOKEN ?? '')
+  const tgId = verified.ok ? verified.userId : undefined
+  const tgRawClient = typeof body.tg === 'string' ? body.tg.trim().replace(/^@+/, '') : ''
+  const tgRaw = verified.ok && verified.username ? verified.username : tgRawClient
   const tg = tgRaw ? `@${tgRaw}` : ''
   const promoCode = typeof body.promo === 'string' ? body.promo.trim().slice(0, 30) : ''
 

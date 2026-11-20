@@ -61,7 +61,9 @@ async function listAll(env: Env, prefix: string, limit: number): Promise<{ name:
 
 function csvCell(v: unknown): string {
   const s = v === null || v === undefined ? '' : String(v)
-  return /[",\n;]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  // защита от CSV-инъекций в Excel/Sheets (формулы =+-@)
+  const guarded = /^[=+\-@\t\r]/.test(s) ? `'${s}` : s
+  return /[",\n;]/.test(guarded) ? `"${guarded.replace(/"/g, '""')}"` : guarded
 }
 
 export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {

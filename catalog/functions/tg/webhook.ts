@@ -1,5 +1,6 @@
 import type { Env, KvNamespace } from '../_lib/kv'
 import { FEEDBACK_KEYBOARD } from '../_lib/telegram'
+import { safeEqual } from '../_lib/safe'
 
 type FbItem = {
   id: string
@@ -103,7 +104,7 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
   const { request, env } = context
 
   const secret = env.TELEGRAM_WEBHOOK_SECRET
-  if (!secret || request.headers.get('x-telegram-bot-api-secret-token') !== secret) {
+  if (!secret || !safeEqual(request.headers.get('x-telegram-bot-api-secret-token') ?? '', secret)) {
     return new Response('forbidden', { status: 403 })
   }
 
