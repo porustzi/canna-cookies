@@ -42,6 +42,7 @@ async function tg(token: string, method: string, payload: Record<string, unknown
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5000),
     })
   } catch {
     /* сбой Telegram не должен ронять вебхук */

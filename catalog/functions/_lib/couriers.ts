@@ -34,6 +34,7 @@ export async function tg(
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(5000),
     })
     return (await res.json()) as { ok: boolean; result?: unknown; description?: string }
   } catch {

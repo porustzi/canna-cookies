@@ -49,6 +49,7 @@ export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), reply_markup }),
+      signal: AbortSignal.timeout(5000),
     })
   } catch {
     /* Telegram недоступен — обращение уже лежит в KV */
