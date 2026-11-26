@@ -1,5 +1,11 @@
 const BASE = process.env.BASE || 'http://localhost:8788'
-const PASSWORD = process.env.ADMIN_PASSWORD || 'a$ap2026!'
+const { readFileSync } = await import('node:fs')
+const devVars = readFileSync(new URL('../.dev.vars', import.meta.url), 'utf8')
+const PASSWORD = process.env.ADMIN_PASSWORD || (devVars.match(/^ADMIN_PASSWORD=(.+)$/m) ?? [])[1]?.trim()
+if (!PASSWORD) {
+  console.error('ADMIN_PASSWORD not found in .dev.vars')
+  process.exit(1)
+}
 const OUT = process.env.OUT || 'C:/Users/Tim/AppData/Local/Temp/opencode/admin-e2e'
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
