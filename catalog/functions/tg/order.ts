@@ -26,7 +26,7 @@ type IncomingMessage = { chat: { id: number }; text?: string }
 type Update = { message?: IncomingMessage; callback_query?: CallbackQuery }
 
 const HELP = [
-  'Курьер Canna Cookies 🍪',
+  'Курьерский бот',
   '',
   'Команды:',
   '/me — мой кабинет (статистика)',
@@ -150,7 +150,7 @@ async function handleMessage(env: Env, msg: IncomingMessage, token: string): Pro
       const courier = await createCourier(env, invite.name, chatId)
       await tg(token, 'sendMessage', {
         chat_id: chatId,
-        text: `✅ Добро пожаловать, ${courier.name}!\nТы зарегистрирован как курьер Canna Cookies.\n\nЗаказы будут приходить сюда с кнопками ✅ Взять / ❌ Отклонить.\n/me — твой кабинет.`,
+        text: `✅ Добро пожаловать, ${courier.name}!\nТы зарегистрирован как курьер.\n\nЗаказы будут приходить сюда с кнопками ✅ Взять / ❌ Отклонить.\n/me — твой кабинет.`,
       })
       return
     }
