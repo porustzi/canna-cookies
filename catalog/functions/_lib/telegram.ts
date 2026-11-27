@@ -28,8 +28,11 @@ export const FEEDBACK_KEYBOARD = [
  */
 export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload): Promise<void> {
   const token = env.TELEGRAM_FEEDBACK_TOKEN
-  const chatId = env.TELEGRAM_FEEDBACK_CHAT_ID
-  if (!token || !chatId) return
+  const chatIds = (env.TELEGRAM_FEEDBACK_CHAT_ID ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (!token || chatIds.length === 0) return
 
   const label =
     feedback.type === 'complaint' ? '⚠️ Жалоба' : feedback.type === 'dispute' ? '⚔️ Спор' : '💬 Вопрос'
@@ -44,14 +47,16 @@ export async function sendFeedbackToTelegram(env: Env, feedback: FeedbackPayload
 
   const reply_markup = JSON.stringify({ inline_keyboard: FEEDBACK_KEYBOARD })
 
-  try {
-    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), reply_markup }),
-      signal: AbortSignal.timeout(5000),
-    })
-  } catch {
-    /* Telegram недоступен — обращение уже лежит в KV */
+  for (const chatId of chatIds) {
+    try {
+      await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), reply_markup }),
+        signal: AbortSignal.timeout(5000),
+      })
+    } catch {
+      /* Telegram недоступен — обращение уже лежит в KV */
+    }
   }
 }

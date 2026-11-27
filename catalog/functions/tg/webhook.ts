@@ -119,11 +119,14 @@ export async function onRequestPost(context: { request: Request; env: Env }): Pr
     return new Response('ok')
   }
 
-  const adminId = env.TELEGRAM_FEEDBACK_CHAT_ID
+  const adminIds = (env.TELEGRAM_FEEDBACK_CHAT_ID ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
   const cb = update.callback_query
   const msg = update.message
   const chatId = cb?.message?.chat.id ?? msg?.chat.id
-  const isAdmin = Boolean(adminId) && chatId !== undefined && String(chatId) === adminId
+  const isAdmin = chatId !== undefined && adminIds.includes(String(chatId))
 
   if (cb) {
     if (!isAdmin || !cb.message) {
